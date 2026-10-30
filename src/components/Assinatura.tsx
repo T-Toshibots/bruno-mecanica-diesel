@@ -55,7 +55,7 @@ export function Assinatura({ valor, onChange }: { valor?: string; onChange: (v?:
     <div>
       <canvas
         ref={ref}
-        className="h-40 w-full touch-none rounded-lg bg-white"
+        className="h-40 w-full touch-none rounded-lg border-2 border-dashed border-borda bg-white"
         onPointerDown={inicio}
         onPointerMove={mover}
         onPointerUp={fim}

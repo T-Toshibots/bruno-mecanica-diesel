@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Cores da marca vêm de src/config/tema.ts (aplicadas em tempo de execução). */
 @theme {
   --color-brand: #F7931E;
   --color-brand-claro: #FFA733;
@@ -10,8 +13,20 @@
   --color-borda: #2E2E2E;
   --color-prata: #D9D9D9;
   --color-cinza: #8A8A8A;
+  --color-forte: #FFFFFF;
   --font-titulo: "Saira Condensed", system-ui, sans-serif;
   --font-sans: "Inter", system-ui, sans-serif;
+}
+
+/* Tema claro: alto contraste para uso no sol. */
+:root[data-theme="light"] {
+  --color-fundo: #F2F2EF;
+  --color-painel: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-borda: #D4D4CF;
+  --color-prata: #262626;
+  --color-cinza: #5E5E5E;
+  --color-forte: #0A0A0A;
 }
 
 html, body, #root { min-height: 100%; }
@@ -23,15 +38,18 @@ body {
 }
 
 @layer components {
-  .titulo { @apply font-titulo font-extrabold italic uppercase tracking-wide text-white; }
+  .titulo { @apply font-titulo font-extrabold italic uppercase tracking-wide text-forte; }
   .card { @apply rounded-xl border border-borda bg-card p-4; }
-  .btn-primario, .btn-secundario, .btn-perigo { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition active:scale-[.98] disabled:opacity-50; }
+  /* Botões e campos com altura mínima de 44px (uso com luva / mão suja). */
+  .btn-primario, .btn-secundario, .btn-perigo { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition active:scale-[.98] disabled:opacity-50; }
   .btn-primario { @apply bg-brand text-black hover:bg-brand-claro; }
-  .btn-secundario { @apply border border-borda bg-painel text-prata hover:border-brand/60 hover:text-white; }
-  .btn-perigo { @apply border border-red-900 bg-red-950/40 text-red-300 hover:bg-red-900/40; }
-  .input { @apply w-full rounded-lg border border-borda bg-painel px-3 py-2.5 text-sm text-white placeholder:text-cinza/70 outline-none focus:border-brand focus:ring-1 focus:ring-brand; }
-  .label { @apply mb-1 block text-xs font-medium uppercase tracking-wide text-cinza; }
-  .chip { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset; }
+  .btn-secundario { @apply border border-borda bg-painel text-prata hover:border-brand/60 hover:text-forte; }
+  .btn-perigo { @apply border border-red-700/60 bg-red-500/10 text-red-700 hover:bg-red-500/20 dark:text-red-300; }
+  .input { @apply min-h-11 w-full rounded-lg border border-borda bg-painel px-3 py-2.5 text-base text-forte placeholder:text-cinza/70 outline-none focus:border-brand focus:ring-1 focus:ring-brand sm:text-sm; }
+  .label { @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-cinza; }
+  .chip { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset; }
+  .texto-ok { @apply text-emerald-700 dark:text-emerald-400; }
+  .texto-alerta { @apply text-red-700 dark:text-red-400; }
 }
 
 input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
@@ -40,7 +58,6 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 @media print {
   body { background: #fff !important; color: #000 !important; }
   .no-print { display: none !important; }
-  .print-area { color: #000 !important; }
-  .print-area * { color: #000 !important; border-color: #ccc !important; background: transparent !important; }
+  .print-area, .print-area * { color: #000 !important; border-color: #ccc !important; background: transparent !important; }
   @page { margin: 12mm; }
 }

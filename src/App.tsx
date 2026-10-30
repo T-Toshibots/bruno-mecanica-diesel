@@ -1,68 +1,85 @@
 import { useEffect, useState } from 'react'
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { ProvedorSessao } from './app/sessao'
 import { Layout } from './components/Layout'
-import { seedSeNecessario } from './data/seed'
-import { Login } from './pages/Login'
-import { Dashboard } from './pages/Dashboard'
-import { Clientes } from './pages/Clientes'
-import { ClienteForm } from './pages/ClienteForm'
-import { ClienteDetalhe } from './pages/ClienteDetalhe'
-import { OSLista } from './pages/OSLista'
-import { OSForm } from './pages/OSForm'
-import { OSDetalhe } from './pages/OSDetalhe'
-import { Financeiro } from './pages/Financeiro'
-import { Configuracoes } from './pages/Configuracoes'
+import { removerBancoAntigo, setLocal } from './db/banco'
+import { semearServidor, servidorVazio } from './demo/seed'
+import type { Perfil } from './domain/tipos'
+import { carregarSessao, getDeviceId, type Sessao } from './sync/contexto'
+import { iniciarAgendador } from './sync/agendador'
+import { entrar, sair } from './sync/sessao'
+import { Login } from './features/login/Login'
+import { Painel } from './features/painel/Painel'
+import { OSLista } from './features/os/OSLista'
+import { OSForm } from './features/os/OSForm'
+import { OSDetalhe } from './features/os/OSDetalhe'
+import { Clientes } from './features/clientes/Clientes'
+import { ClienteForm } from './features/clientes/ClienteForm'
+import { ClienteDetalhe } from './features/clientes/ClienteDetalhe'
+import { Financeiro } from './features/financeiro/Financeiro'
+import { Configuracoes } from './features/configuracoes/Configuracoes'
+import { Sincronizacao } from './features/sincronizacao/Sincronizacao'
 
-const CHAVE_SESSAO = 'bmd-logado'
-
-function lerSessao() {
-  try {
-    return localStorage.getItem(CHAVE_SESSAO) === '1'
-  } catch {
-    return false
-  }
+async function iniciar() {
+  await removerBancoAntigo()
+  if (await servidorVazio()) await semearServidor()
+  // Pede ao navegador para não apagar os dados do app (importante no iPhone).
+  const persistente = (await navigator.storage?.persist?.().catch(() => false)) ?? false
+  await setLocal('armazenamento_persistente', persistente)
+  await getDeviceId()
+  return carregarSessao()
 }
 
 export function App() {
   const [pronto, setPronto] = useState(false)
-  const [logado, setLogado] = useState(lerSessao)
+  const [sessao, setSessao] = useState<Sessao | null>(null)
+  const [aviso, setAviso] = useState('')
 
   useEffect(() => {
-    seedSeNecessario().finally(() => setPronto(true))
+    iniciar().then((s) => { setSessao(s); setPronto(true) })
   }, [])
 
-  const entrar = () => {
-    try { localStorage.setItem(CHAVE_SESSAO, '1') } catch { /* sem armazenamento */ }
-    setLogado(true)
-  }
-  const sair = () => {
-    try { localStorage.removeItem(CHAVE_SESSAO) } catch { /* sem armazenamento */ }
-    setLogado(false)
-  }
+  useEffect(() => {
+    if (!sessao) return
+    const parar = iniciarAgendador()
+    const desativado = async () => {
+      await sair()
+      setSessao(null)
+      setAviso('Seu acesso foi desativado. Fale com o responsável pela oficina.')
+    }
+    window.addEventListener('usuario-desativado', desativado)
+    return () => { parar(); window.removeEventListener('usuario-desativado', desativado) }
+  }, [sessao])
 
-  if (!pronto) {
-    return <div className="flex min-h-screen items-center justify-center text-cinza">Carregando…</div>
-  }
-  if (!logado) return <Login onEntrar={entrar} />
+  if (!pronto) return <div className="flex min-h-screen items-center justify-center text-cinza">Carregando…</div>
+
+  if (!sessao)
+    return <Login aviso={aviso} onEntrar={async (p: Perfil) => { setAviso(''); setSessao(await entrar(p)) }} />
+
+  const permitido = (ok: boolean, el: JSX.Element) => (ok ? el : <Navigate to="/" replace />)
+  const naoMecanico = sessao.papel !== 'mecanico'
 
   return (
-    <HashRouter>
-      <Routes>
-        <Route element={<Layout onSair={sair} />}>
-          <Route index element={<Dashboard />} />
-          <Route path="os" element={<OSLista />} />
-          <Route path="os/nova" element={<OSForm />} />
-          <Route path="os/:id" element={<OSDetalhe />} />
-          <Route path="os/:id/editar" element={<OSForm />} />
-          <Route path="clientes" element={<Clientes />} />
-          <Route path="clientes/novo" element={<ClienteForm />} />
-          <Route path="clientes/:id" element={<ClienteDetalhe />} />
-          <Route path="clientes/:id/editar" element={<ClienteForm />} />
-          <Route path="financeiro" element={<Financeiro />} />
-          <Route path="config" element={<Configuracoes />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
-    </HashRouter>
+    <ProvedorSessao sessao={sessao} sair={async () => { await sair(); setSessao(null) }}>
+      <HashRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<Painel />} />
+            <Route path="os" element={<OSLista />} />
+            <Route path="os/nova" element={<OSForm />} />
+            <Route path="os/:id" element={<OSDetalhe />} />
+            <Route path="os/:id/editar" element={<OSForm />} />
+            <Route path="clientes" element={permitido(naoMecanico, <Clientes />)} />
+            <Route path="clientes/novo" element={permitido(naoMecanico, <ClienteForm />)} />
+            <Route path="clientes/:id" element={permitido(naoMecanico, <ClienteDetalhe />)} />
+            <Route path="clientes/:id/editar" element={permitido(naoMecanico, <ClienteForm />)} />
+            <Route path="financeiro" element={permitido(naoMecanico, <Financeiro />)} />
+            <Route path="config" element={permitido(sessao.papel === 'dono', <Configuracoes />)} />
+            <Route path="sincronizacao" element={<Sincronizacao />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </HashRouter>
+    </ProvedorSessao>
   )
 }
