@@ -3,3 +3,6 @@ dist
 dev-dist
 *.local
 *.tsbuildinfo
+qrcode-celular.png
+test-results
+playwright-report
