@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { tema } from './src/config/tema'
 
 export default defineConfig({
   base: '/bruno-mecanica-diesel/',
@@ -9,19 +10,20 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'logo.png'],
+      // 'prompt': a nova versão só é aplicada depois de sincronizar (ver src/app/atualizacao.ts)
+      registerType: 'prompt',
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', tema.logo],
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
       manifest: {
-        name: 'Bruno Mecânica Diesel',
-        short_name: 'Bruno OS',
-        description: 'Ordens de serviço, clientes e financeiro — Bruno Mecânica Diesel',
+        name: tema.nomeSistema,
+        short_name: tema.nomeCurto,
+        description: `Ordens de serviço, clientes e financeiro — ${tema.nomeSistema}`,
         lang: 'pt-BR',
-        theme_color: '#0F0F0F',
-        background_color: '#0F0F0F',
+        theme_color: tema.cores.fundoEscuro,
+        background_color: tema.cores.fundoEscuro,
         display: 'standalone',
         orientation: 'portrait',
         start_url: '.',
