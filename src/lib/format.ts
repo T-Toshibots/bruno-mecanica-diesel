@@ -1,6 +1,6 @@
 import type {
   CondicaoFaturamento, FormaPagamento, LocalOS, Modalidade, OrdemServico, Papel, PapelContato, StatusOS, TipoFornecedor, TipoItem,
-  TipoOS, TipoVeiculo,
+  TipoOS, TipoVeiculo, MomentoFoto, OSAprovacao,
 } from '../domain/tipos'
 
 const moedaFmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -108,3 +108,9 @@ export const TIPOS_FORNECEDOR: Record<TipoFornecedor, string> = {
 export const PAPEIS_CONTATO: Record<PapelContato, string> = { frota: 'Responsável de frota', financeiro: 'Financeiro', outro: 'Outro' }
 
 export const minutosParaHoras = (min?: number) => (min ? `${Math.floor(min / 60)}h${min % 60 ? String(min % 60).padStart(2, '0') : ''}` : '—')
+
+export const MOMENTOS_FOTO: Record<MomentoFoto, string> = { antes: 'Antes', durante: 'Durante', depois: 'Depois' }
+
+export const MEIOS_APROVACAO: Record<OSAprovacao['meio'], string> = {
+  whatsapp: 'WhatsApp', telefone: 'Telefone', email: 'E-mail', assinatura: 'Assinatura', presencial: 'Presencial',
+}

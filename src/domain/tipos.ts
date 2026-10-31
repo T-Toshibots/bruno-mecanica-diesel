@@ -133,12 +133,20 @@ export interface OrdemServico extends Base {
   motivo_cancelamento?: string
   /** Definido pelo servidor: finalizada/faturada/cancelada só o Dono altera. */
   travada: boolean
+  previsao_entrega?: string
+  /** Endereço do atendimento fora da oficina e GPS (opcional, com permissão do usuário). */
+  endereco?: string
+  lat?: number
+  lng?: number
+  /** Retorno em garantia: OS original. */
+  os_origem_id?: string
 }
 
 export interface OSVeiculo extends Base {
   os_id: string
   veiculo_id: string
   km?: number
+  horimetro?: number
 }
 
 export interface OSMecanico extends Base {
@@ -156,21 +164,56 @@ export interface OSItem extends Base {
   /** Preço de venda ao cliente. */
   preco: number
   ordem: number
+  /** Veículo da OS ao qual o item pertence (OS com cavalo + carreta, por exemplo). */
+  os_veiculo_id?: string
+  servico_id?: string
+  /** Peças: código/referência, origem e fornecedor. */
+  codigo?: string
+  origem?: 'oficina' | 'cliente'
+  fornecedor_id?: string
+  garantia_dias?: number
 }
+
+export type MomentoFoto = 'antes' | 'durante' | 'depois'
 
 export interface OSFoto extends Base {
   os_id: string
-  imagem: string
+  item_id?: string
+  momento?: MomentoFoto
   legenda?: string
+  /** Arquivo da foto completa (enviado ao Storage por fila própria). */
+  arquivo_id?: string
+  /** Miniatura pequena, sincronizada junto com o registro (aparece mesmo offline). */
+  miniatura?: string
+  /** Fotos antigas (v1/Fase 2): imagem inteira no próprio registro. */
+  imagem?: string
 }
 
 export interface OSAssinatura extends Base {
   os_id: string
   papel: 'cliente' | 'mecanico'
   nome: string
+  documento?: string
   imagem: string
   offline: boolean
   data: string
+}
+
+/** Horas trabalhadas: iniciar/pausar/finalizar. `fim` vazio = em andamento. */
+export interface OSApontamento extends Base {
+  os_id: string
+  funcionario_id: string
+  inicio: string
+  fim?: string | null
+}
+
+export interface OSAprovacao extends Base {
+  os_id: string
+  aprovado_por: string
+  meio: 'whatsapp' | 'telefone' | 'email' | 'assinatura' | 'presencial'
+  pedido_numero?: string
+  data: string
+  usuario_nome: string
 }
 
 export interface OSStatusHist extends Base {
