@@ -48,9 +48,9 @@ export function Configuracoes() {
   return (
     <>
       <Cabecalho titulo="Configurações" subtitulo="Visível somente para o Dono" />
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Secao titulo="Dados da oficina" acoes={<button onClick={salvarOficina} className="btn-primario"><Save size={16} /> {salvo ? 'Salvo!' : 'Salvar'}</button>}>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {([['nome', 'Nome'], ['documento', 'CNPJ'], ['telefone', 'Telefone'], ['email', 'E-mail'], ['endereco', 'Endereço'], ['cidade', 'Cidade/UF'], ['pix', 'Chave Pix']] as const).map(([k, r]) => (
               <Campo key={k} rotulo={r}><input className="input" value={oficina[k]} onChange={(e) => setOficina({ ...oficina, [k]: e.target.value })} /></Campo>
             ))}

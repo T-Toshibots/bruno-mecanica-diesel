@@ -26,7 +26,7 @@ export function Fornecedores() {
         <input className="input pl-10" placeholder="Buscar nome, tipo, cidade ou CNPJ" value={busca} onChange={(e) => setBusca(e.target.value)} />
       </div>
       {lista.length === 0 ? <Vazio texto="Nenhum fornecedor." /> : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {lista.map((f) => (
             <div key={f.id} className="card flex items-start gap-3">
               <Package className="mt-0.5 shrink-0 text-brand" size={20} />

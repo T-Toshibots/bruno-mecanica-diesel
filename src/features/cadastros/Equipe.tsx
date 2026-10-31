@@ -24,7 +24,7 @@ export function Equipe() {
       <Cabecalho titulo="Equipe" subtitulo={perm.verSalarios ? `Folha mensal: ${brl(salarios.reduce((s, x) => s + x.salario, 0))}` : 'Mecânicos e funcionários'}
         acoes={<button className="btn-primario" onClick={() => setEditando({ ativo: true, funcao: 'Mecânico', especialidades: [] })}><Plus size={18} /> Novo</button>} />
       {funcionarios.length === 0 ? <Vazio texto="Nenhum funcionário." /> : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {funcionarios.map((f) => {
             const sal = salarios.find((s) => s.funcionario_id === f.id)
             const perfil = perfis.find((p) => p.funcionario_id === f.id)

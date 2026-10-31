@@ -105,9 +105,9 @@ export function ClienteForm() {
     <form onSubmit={salvar}>
       <Cabecalho titulo={id ? 'Editar cliente' : 'Novo cliente'} acoes={<button className="btn-primario"><Save size={18} /> Salvar</button>} />
       {consulta.msg && <div className="mb-4"><Aviso tipo={consulta.msg.startsWith('Dados') ? 'info' : 'alerta'}>{consulta.msg}</Aviso></div>}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Secao titulo="Identificação">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Campo rotulo="Tipo">
               <select className="input" value={c.tipo} onChange={(e) => set('tipo', e.target.value as Form['tipo'])}>
                 <option value="PJ">Pessoa jurídica (empresa)</option>
@@ -141,7 +141,7 @@ export function ClienteForm() {
         </Secao>
 
         <Secao titulo="Endereço e contato principal">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Campo rotulo="CEP">
               <div className="flex gap-2">
                 <input className="input" inputMode="numeric" value={c.cep ?? ''} onChange={(e) => set('cep', e.target.value)} onBlur={() => (c.cep ?? '').replace(/\D/g, '').length === 8 && !c.endereco && consultarCEP()} />
@@ -182,7 +182,7 @@ export function ClienteForm() {
         </Secao>
 
         <Secao titulo="Comercial e faturamento">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Campo rotulo="Modalidade" className="sm:col-span-2">
               <select className="input" value={c.modalidade} onChange={(e) => set('modalidade', e.target.value as Form['modalidade'])}>
                 {Object.entries(MODALIDADES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -216,7 +216,7 @@ export function ClienteForm() {
         <div className="lg:col-span-2">
           <Secao titulo="Tabela de preços do cliente">
             <p className="mb-3 text-xs text-cinza">Deixe em branco para usar o preço padrão da oficina/catálogo. Estes valores são aplicados automaticamente nas OS deste cliente.</p>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Campo rotulo="Hora técnica (R$)"><input className="input" type="number" step="0.01" value={geral.valor_hora ?? ''} onChange={(e) => setGeral({ ...geral, valor_hora: num(e.target.value) })} /></Campo>
               <Campo rotulo="Deslocamento fixo (R$)"><input className="input" type="number" step="0.01" value={geral.deslocamento_fixo ?? ''} onChange={(e) => setGeral({ ...geral, deslocamento_fixo: num(e.target.value) })} /></Campo>
               <Campo rotulo="Ou deslocamento por km (R$)"><input className="input" type="number" step="0.01" value={geral.valor_km ?? ''} onChange={(e) => setGeral({ ...geral, valor_km: num(e.target.value) })} /></Campo>

@@ -1,22 +1,70 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useSyncExternalStore } from 'react'
-import { CloudOff, RefreshCw, Trash2 } from 'lucide-react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
+import { CloudOff, Image, RefreshCw, Trash2 } from 'lucide-react'
 import { useSessao } from '../../app/sessao'
 import { db, getLocal } from '../../db/banco'
 import { dataHora, tempoRelativo } from '../../lib/format'
 import { useStatusSync } from '../../sync/agendador'
 import { assinarRede, setSimularOffline, simulandoOffline } from '../../sync/rede'
-import { sincronizar } from '../../sync/sincronizar'
+import { liberarArquivosEnviados, sincronizar } from '../../sync/sincronizar'
 import { Aviso, Cabecalho, Kpi, Secao, Vazio } from '../../components/ui'
 
 const NOMES_TABELA: Record<string, string> = {
   os: 'OS', os_itens: 'Item de OS', os_veiculos: 'Veículo da OS', os_mecanicos: 'Mecânico da OS', os_fotos: 'Foto',
   os_assinaturas: 'Assinatura', os_status_hist: 'Histórico de status', clientes: 'Cliente', veiculos: 'Veículo',
   funcionarios: 'Funcionário', funcionarios_salario: 'Salário', servicos_catalogo: 'Serviço do catálogo',
-  oficina_config: 'Dados da oficina', perfis: 'Usuário',
+  oficina_config: 'Dados da oficina', perfis: 'Usuário', os_apontamentos: 'Horas trabalhadas', os_aprovacoes: 'Aprovação',
+  cliente_contatos: 'Contato do cliente', cliente_precos: 'Preço do cliente', fornecedores: 'Fornecedor', veiculo_clientes_hist: 'Dono do veículo',
+}
+
+function SecaoFotos() {
+  const s = useStatusSync()
+  const enviadasNoAparelho = useLiveQuery(() => db.arquivos.where('enviado').equals(1).count(), [], 0)
+  return (
+    <Secao titulo="Fotos">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+        <div className="flex items-center gap-2 text-prata">
+          <Image size={18} className="shrink-0 text-brand" />
+          <span><strong className="text-forte">{s.fotosPendentes}</strong> aguardando envio · <strong className="text-forte">{enviadasNoAparelho}</strong> já enviadas e ainda guardadas no aparelho</span>
+        </div>
+        <button className="btn-secundario" disabled={!enviadasNoAparelho}
+          onClick={async () => { if (confirm('Liberar o espaço das fotos já enviadas? As miniaturas continuam; a foto completa fica disponível com internet.')) await liberarArquivosEnviados() }}>
+          Liberar espaço
+        </button>
+      </div>
+      {s.arquivos && (
+        <div className="mt-3">
+          <div className="mb-1 text-xs text-cinza">Enviando fotos: {s.arquivos.enviados} de {s.arquivos.total}</div>
+          <BarraProgresso valor={s.arquivos.enviados} total={s.arquivos.total} />
+        </div>
+      )}
+    </Secao>
+  )
+}
+
+export function BarraProgresso({ valor, total, fina }: { valor: number; total: number; fina?: boolean }) {
+  return (
+    <div className={`${fina ? 'h-1' : 'h-2 rounded-full'} bg-painel`}>
+      <div className={`${fina ? 'h-1' : 'h-2 rounded-full'} bg-brand transition-all`} style={{ width: `${total ? (valor / total) * 100 : 0}%` }} />
+    </div>
+  )
+}
+
+/** O service worker terminou de guardar o app? (antes disso, abrir sem internet não funciona) */
+function useProntoOffline() {
+  const [pronto, setPronto] = useState<boolean | null>(null)
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return setPronto(false)
+    let ativo = true
+    navigator.serviceWorker.getRegistration().then((r) => ativo && setPronto(!!r?.active))
+    navigator.serviceWorker.ready.then(() => ativo && setPronto(true))
+    return () => { ativo = false }
+  }, [])
+  return pronto
 }
 
 export function Sincronizacao() {
+  const prontoOffline = useProntoOffline()
   const { perm } = useSessao()
   const s = useStatusSync()
   const simulando = useSyncExternalStore(assinarRede, simulandoOffline)
@@ -49,11 +97,16 @@ export function Sincronizacao() {
         </button>
       </div>
       {s.ultimoErro && <div className="mt-3"><Aviso tipo="alerta">{s.ultimoErro}</Aviso></div>}
+      {prontoOffline === false && (
+        <div className="mt-3"><Aviso tipo="alerta">O app ainda está sendo guardado neste aparelho. Mantenha a internet ligada até este aviso sumir antes de usar sem internet.</Aviso></div>
+      )}
+      {prontoOffline && <p className="mt-3 text-xs texto-ok">✓ App guardado neste aparelho: abre mesmo sem internet.</p>}
       {!info?.persistente && (
         <div className="mt-3"><Aviso tipo="alerta">O navegador não garantiu armazenamento permanente. Instale o app na tela inicial e use-o com frequência para evitar perda de dados (principalmente no iPhone).</Aviso></div>
       )}
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div className="lg:col-span-2"><SecaoFotos /></div>
         <Secao titulo={`Fila de envio (${fila.length})`}>
           {fila.length === 0 ? <Vazio texto="Tudo enviado." /> : (
             <ul className="divide-y divide-borda text-sm">

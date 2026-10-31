@@ -11,6 +11,7 @@ import { useTemaVisual } from '../lib/tema-visual'
 import { useStatusSync } from '../sync/agendador'
 import { sincronizar } from '../sync/sincronizar'
 import { Modal } from './ui'
+import { BarraProgresso } from '../features/sincronizacao/Sincronizacao'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -155,6 +156,11 @@ export function Layout() {
         </div>
       </header>
 
+      {status.arquivos && (
+        <div className="no-print sticky top-[57px] z-20" title={`Enviando fotos ${status.arquivos.enviados}/${status.arquivos.total}`}>
+          <BarraProgresso valor={status.arquivos.enviados} total={status.arquivos.total} fina />
+        </div>
+      )}
       <main className="mx-auto max-w-6xl space-y-4 px-4 pb-28 pt-4 lg:px-8 lg:pb-10">
         <Avisos />
         <div><Outlet /></div>

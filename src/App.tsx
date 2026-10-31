@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react'
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ProvedorSessao } from './app/sessao'
 import { Layout } from './components/Layout'
-import { db, removerBancoAntigo, setLocal } from './db/banco'
+import { removerBancoAntigo, setLocal } from './db/banco'
 import { recriarDemo, seedDesatualizado, semearServidor, servidorVazio } from './demo/seed'
 import type { Perfil } from './domain/tipos'
 import { carregarSessao, getDeviceId, type Sessao } from './sync/contexto'
 import { iniciarAgendador } from './sync/agendador'
-import { entrar, sair } from './sync/sessao'
+import { entrar, podeSairSemPerda, sair } from './sync/sessao'
 import { Login } from './features/login/Login'
 import { Painel } from './features/painel/Painel'
 import { OSLista } from './features/os/OSLista'
@@ -29,7 +29,7 @@ async function iniciar() {
   await removerBancoAntigo()
   if (await servidorVazio()) await semearServidor()
   // Dados de demonstração de versão anterior: recria (só se não houver nada pendente no aparelho).
-  else if ((await seedDesatualizado()) && (await db.outbox.count()) === 0) await recriarDemo()
+  else if ((await seedDesatualizado()) && (await podeSairSemPerda())) await recriarDemo()
   // Pede ao navegador para não apagar os dados do app (importante no iPhone).
   const persistente = (await navigator.storage?.persist?.().catch(() => false)) ?? false
   await setLocal('armazenamento_persistente', persistente)
@@ -61,7 +61,7 @@ export function App() {
   if (!pronto) return <div className="flex min-h-screen items-center justify-center text-cinza">Carregando…</div>
 
   if (!sessao)
-    return <Login aviso={aviso} onEntrar={async (p: Perfil) => { setAviso(''); setSessao(await entrar(p)) }} />
+    return <Login aviso={aviso} onEntrar={async (p: Perfil) => { setAviso(''); window.location.hash = '#/'; setSessao(await entrar(p)) }} />
 
   const permitido = (ok: boolean, el: JSX.Element) => (ok ? el : <Navigate to="/" replace />)
   const naoMecanico = sessao.papel !== 'mecanico'

@@ -111,7 +111,7 @@ export function Importar() {
     <>
       <CadastrosAbas />
       <Cabecalho titulo="Importar planilha" subtitulo="Clientes e veículos de uma vez, a partir do Excel ou CSV" />
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Secao titulo="Como funciona">
           <ol className="list-decimal space-y-2 pl-5 text-sm text-prata">
             <li>Baixe o modelo e preencha no Excel (uma linha por veículo; repita o cliente se ele tiver vários).</li>

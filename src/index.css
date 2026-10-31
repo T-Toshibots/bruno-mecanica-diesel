@@ -31,11 +31,16 @@
 
 html, body, #root { min-height: 100%; }
 body {
+  /* nunca rolar para o lado no celular (clip não atrapalha elementos fixos/sticky) */
+  overflow-x: clip;
   background: var(--color-fundo);
   color: var(--color-prata);
   font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Itens de grade podem encolher: textos longos (nomes, placas) não alargam a página no celular */
+.grid > * { min-width: 0; }
 
 @layer components {
   .titulo { @apply font-titulo font-extrabold italic uppercase tracking-wide text-forte; }
