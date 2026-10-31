@@ -57,3 +57,8 @@ Registro das decisões tomadas durante o desenvolvimento (regra 2 do prompt).
     - uma sincronização em andamento do usuário anterior impedia o novo usuário de baixar os dados dele;
     - ao trocar de usuário, o app volta ao Painel.
 37. **Primeiro acesso precisa de internet** até o app ficar guardado no aparelho. A tela Sincronização mostra "App guardado neste aparelho" quando já dá para usar offline.
+
+## Ajustes após a Fase 4 (pedido do usuário, 30/10/2026)
+
+38. **Botão "Trocar perfil"** no topo (no celular, tocando no nome do perfil): alterna entre Dono, Secretária e Mecânicos sem precisar sair. Antes de trocar, envia as pendências; se não der (sem internet), a troca é bloqueada para nada ficar para trás.
+39. **Atualização do app:** aparelhos que abriram a primeira versão (tela "Usuário e Senha") ficavam presos nela, porque aquela versão não mostrava o aviso de "nova versão". Agora o service worker novo assume assim que é instalado e a primeira versão recarrega sozinha para a nova (testado simulando a troca de versão). Nas versões novas, a tela aberta continua igual até o usuário tocar em "Sincronizar e atualizar"; se fechar e abrir o app, já abre na versão nova. Nenhum dado se perde, porque tudo fica no IndexedDB e a fila de envio continua de uma versão para a outra.

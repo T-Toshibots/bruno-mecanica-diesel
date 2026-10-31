@@ -63,11 +63,17 @@ export function App() {
   if (!sessao)
     return <Login aviso={aviso} onEntrar={async (p: Perfil) => { setAviso(''); window.location.hash = '#/'; setSessao(await entrar(p)) }} />
 
+  const trocar = async (p: Perfil) => {
+    window.location.hash = '#/'
+    await sair()
+    setSessao(await entrar(p))
+  }
+
   const permitido = (ok: boolean, el: JSX.Element) => (ok ? el : <Navigate to="/" replace />)
   const naoMecanico = sessao.papel !== 'mecanico'
 
   return (
-    <ProvedorSessao sessao={sessao} sair={async () => { await sair(); setSessao(null) }}>
+    <ProvedorSessao sessao={sessao} sair={async () => { await sair(); setSessao(null) }} trocar={trocar}>
       <HashRouter>
         <Routes>
           <Route element={<Layout />}>

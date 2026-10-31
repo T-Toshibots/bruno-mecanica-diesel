@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
-  AlertTriangle, ClipboardList, CloudOff, Database, Gauge, LogOut, Monitor, Moon, Plus, RefreshCw, Settings, Sun, Users, Wallet, Wifi,
+  AlertTriangle, ChevronDown, ClipboardList, CloudOff, Database, Gauge, LogOut, Monitor, Moon, Plus, RefreshCw, Settings, Sun, Users, Wallet, Wifi,
 } from 'lucide-react'
 import { useSessao } from '../app/sessao'
 import { aplicarAtualizacao, useNovaVersao } from '../app/atualizacao'
@@ -9,6 +10,9 @@ import { tema } from '../config/tema'
 import { PAPEIS } from '../lib/format'
 import { useTemaVisual } from '../lib/tema-visual'
 import { useStatusSync } from '../sync/agendador'
+import { podeSairSemPerda } from '../sync/sessao'
+import { nuvem } from '../db/banco'
+import type { Papel, Perfil } from '../domain/tipos'
 import { sincronizar } from '../sync/sincronizar'
 import { Modal } from './ui'
 import { BarraProgresso } from '../features/sincronizacao/Sincronizacao'
@@ -87,6 +91,7 @@ export function Layout() {
   const status = useStatusSync()
   const navigate = useNavigate()
   const [confirmarSaida, setConfirmarSaida] = useState(false)
+  const [trocando, setTrocando] = useState(false)
 
   const nav = [
     { to: '/', label: 'Painel', icone: Gauge, end: true },
@@ -138,14 +143,17 @@ export function Layout() {
       </aside>
 
       <header className="no-print sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-borda bg-fundo/90 px-3 pb-2 pt-[max(.5rem,env(safe-area-inset-top))] backdrop-blur sm:px-4">
-        <div className="flex min-w-0 items-center gap-2 lg:hidden">
+        {/* Celular: o nome do perfil é o botão de trocar perfil */}
+        <button onClick={() => setTrocando(true)} className="flex min-w-0 items-center gap-2 text-left lg:hidden" aria-label="Trocar perfil">
           <img src={BASE + tema.icone} alt="" className="h-9 w-9 shrink-0 rounded-full" />
-          <div className="min-w-0 leading-none">
-            <div className="titulo truncate text-base">{tema.nomeCurto}</div>
-            <div className="truncate text-[10px] font-semibold uppercase tracking-wider text-brand">{sessao.nome} · {PAPEIS[sessao.papel]}</div>
-          </div>
-        </div>
-        <div className="hidden text-sm text-cinza lg:block">Sistema de gestão — {tema.complemento}</div>
+          <span className="min-w-0 leading-tight">
+            <span className="block truncate text-sm font-semibold text-forte">{sessao.nome} · {PAPEIS[sessao.papel]}</span>
+            <span className="flex items-center gap-0.5 text-[11px] font-semibold text-brand"><Users size={12} /> Trocar perfil <ChevronDown size={12} /></span>
+          </span>
+        </button>
+        <button onClick={() => setTrocando(true)} className="btn-secundario hidden lg:inline-flex">
+          <Users size={16} /> {sessao.nome} · {PAPEIS[sessao.papel]} — <span className="text-brand">Trocar perfil</span> <ChevronDown size={14} />
+        </button>
         <div className="flex items-center">
           <IndicadorSync />
           <BotaoTema />
@@ -179,6 +187,8 @@ export function Layout() {
         {inferior.slice(2).map((n) => <ItemInferior key={n.to} to={n.to} label={n.curto ?? n.label} Icone={n.icone} />)}
       </nav>
 
+      {trocando && <TrocarPerfil onFechar={() => setTrocando(false)} />}
+
       <Modal aberto={confirmarSaida} titulo="Alterações não enviadas" onFechar={() => setConfirmarSaida(false)}>
         <p className="text-sm text-prata">
           Há <strong className="text-forte">{status.pendentes}</strong> alteração(ões) ainda não enviadas ao servidor.
@@ -193,6 +203,61 @@ export function Layout() {
         </div>
       </Modal>
     </div>
+  )
+}
+
+const DESCRICAO_PAPEL: Record<Papel, string> = {
+  dono: 'Acesso total: financeiro, margem, salários, configurações e auditoria.',
+  secretaria: 'Cadastros, orçamentos, OS e cobranças. Sem lucro, salários ou configurações.',
+  mecanico: 'Só as OS atribuídas a ele, sem valores. Abre chamado em campo.',
+}
+
+/** Modo demonstração: alterna entre Dono, Secretária e Mecânicos com um toque. */
+function TrocarPerfil({ onFechar }: { onFechar: () => void }) {
+  const { sessao, trocar } = useSessao()
+  const status = useStatusSync()
+  const [erro, setErro] = useState('')
+  const [entrando, setEntrando] = useState<string | null>(null)
+  const perfis = useLiveQuery(async () => {
+    const ordem: Papel[] = ['dono', 'secretaria', 'mecanico']
+    return (await nuvem.t('perfis').toArray()).filter((p) => !p.deleted_at).sort((a, b) => ordem.indexOf(a.papel) - ordem.indexOf(b.papel))
+  }, [], [] as Perfil[])
+
+  const escolher = async (p: Perfil) => {
+    if (p.id === sessao.usuario_id) return onFechar()
+    setErro('')
+    setEntrando(p.id)
+    // Nada pendente pode ficar para trás: envia antes de trocar.
+    if (status.pendentes > 0) await sincronizar({ forcar: true })
+    if (!(await podeSairSemPerda())) {
+      setEntrando(null)
+      return setErro('Há alterações deste perfil ainda não enviadas. Conecte-se à internet e sincronize antes de trocar.')
+    }
+    await trocar(p)
+    onFechar()
+  }
+
+  return (
+    <Modal aberto titulo="Trocar perfil" onFechar={onFechar}>
+      <p className="mb-3 text-sm text-cinza">Escolha o perfil para ver o sistema como cada pessoa vê. Só o Dono tem acesso a tudo.</p>
+      <div className="space-y-2">
+        {perfis.map((p) => (
+          <button key={p.id} disabled={!p.ativo || !!entrando} onClick={() => escolher(p)}
+            className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition disabled:opacity-50 ${p.id === sessao.usuario_id ? 'border-brand bg-brand/10' : 'border-borda bg-card hover:border-brand'}`}>
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/15 font-titulo text-lg font-bold text-brand">{p.nome[0]}</span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-semibold text-forte">
+                {p.nome} <span className="text-xs font-normal text-brand">· {PAPEIS[p.papel]}</span>
+                {p.id === sessao.usuario_id && <span className="ml-1 text-xs font-normal text-cinza">(atual)</span>}
+              </span>
+              <span className="block text-xs text-cinza">{p.ativo ? DESCRICAO_PAPEL[p.papel] : 'Acesso desativado'}</span>
+            </span>
+            {entrando === p.id && <RefreshCw size={18} className="animate-spin text-brand" />}
+          </button>
+        ))}
+      </div>
+      {erro && <p className="mt-3 text-sm texto-alerta">{erro}</p>}
+    </Modal>
   )
 }
 

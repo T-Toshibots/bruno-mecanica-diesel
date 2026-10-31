@@ -10,10 +10,15 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      // 'prompt': a nova versão só é aplicada depois de sincronizar (ver src/app/atualizacao.ts)
-      registerType: 'prompt',
+      // O registro é feito em src/app/atualizacao.ts: o service worker novo assume na hora
+      // (aparelhos com versão antiga se atualizam sozinhos) e a tela só recarrega depois de sincronizar.
+      registerType: 'autoUpdate',
+      injectRegister: false,
       includeAssets: ['favicon.png', 'apple-touch-icon.png', tema.logo],
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },

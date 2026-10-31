@@ -59,9 +59,10 @@ test('secretária não vê configurações nem margem; dono vê', async ({ page 
   await expect(page.getByLabel('Configurações')).toHaveCount(0)
   await page.goto('./#/financeiro')
   await expect(page.getByText('Margem no mês')).toHaveCount(0)
-  await sair(page)
-
-  await entrar(page, 'Bruno')
+  // Troca direto pelo botão do topo
+  await page.getByRole('button', { name: 'Trocar perfil' }).click()
+  await page.getByRole('button', { name: /Bruno/ }).click()
+  await expect(page.getByText('Bruno · Dono')).toBeVisible({ timeout: 15_000 })
   await expect(page.getByText('Margem no mês')).toBeVisible()
   await expect(page.getByLabel('Configurações')).toBeVisible()
 })
