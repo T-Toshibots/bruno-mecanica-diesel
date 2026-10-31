@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ProvedorSessao } from './app/sessao'
 import { Layout } from './components/Layout'
-import { removerBancoAntigo, setLocal } from './db/banco'
-import { semearServidor, servidorVazio } from './demo/seed'
+import { db, removerBancoAntigo, setLocal } from './db/banco'
+import { recriarDemo, seedDesatualizado, semearServidor, servidorVazio } from './demo/seed'
 import type { Perfil } from './domain/tipos'
 import { carregarSessao, getDeviceId, type Sessao } from './sync/contexto'
 import { iniciarAgendador } from './sync/agendador'
@@ -17,12 +17,19 @@ import { Clientes } from './features/clientes/Clientes'
 import { ClienteForm } from './features/clientes/ClienteForm'
 import { ClienteDetalhe } from './features/clientes/ClienteDetalhe'
 import { Financeiro } from './features/financeiro/Financeiro'
+import { Veiculos } from './features/cadastros/Veiculos'
+import { Equipe } from './features/cadastros/Equipe'
+import { Fornecedores } from './features/cadastros/Fornecedores'
+import { Servicos } from './features/cadastros/Servicos'
+import { Importar } from './features/cadastros/Importar'
 import { Configuracoes } from './features/configuracoes/Configuracoes'
 import { Sincronizacao } from './features/sincronizacao/Sincronizacao'
 
 async function iniciar() {
   await removerBancoAntigo()
   if (await servidorVazio()) await semearServidor()
+  // Dados de demonstração de versão anterior: recria (só se não houver nada pendente no aparelho).
+  else if ((await seedDesatualizado()) && (await db.outbox.count()) === 0) await recriarDemo()
   // Pede ao navegador para não apagar os dados do app (importante no iPhone).
   const persistente = (await navigator.storage?.persist?.().catch(() => false)) ?? false
   await setLocal('armazenamento_persistente', persistente)
@@ -73,6 +80,11 @@ export function App() {
             <Route path="clientes/novo" element={permitido(naoMecanico, <ClienteForm />)} />
             <Route path="clientes/:id" element={permitido(naoMecanico, <ClienteDetalhe />)} />
             <Route path="clientes/:id/editar" element={permitido(naoMecanico, <ClienteForm />)} />
+            <Route path="cadastros/veiculos" element={permitido(naoMecanico, <Veiculos />)} />
+            <Route path="cadastros/equipe" element={permitido(naoMecanico, <Equipe />)} />
+            <Route path="cadastros/fornecedores" element={permitido(naoMecanico, <Fornecedores />)} />
+            <Route path="cadastros/servicos" element={permitido(naoMecanico, <Servicos />)} />
+            <Route path="cadastros/importar" element={permitido(naoMecanico, <Importar />)} />
             <Route path="financeiro" element={permitido(naoMecanico, <Financeiro />)} />
             <Route path="config" element={permitido(sessao.papel === 'dono', <Configuracoes />)} />
             <Route path="sincronizacao" element={<Sincronizacao />} />

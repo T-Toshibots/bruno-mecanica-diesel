@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie'
 import type {
-  Auditoria, Cliente, Funcionario, FuncionarioSalario, OficinaConfig, OrdemServico, OSAssinatura, OSFoto, OSItem,
-  OSMecanico, OSStatusHist, OSVeiculo, Perfil, ServicoCatalogo, SyncConflito, Veiculo,
+  Auditoria, Cliente, ClienteContato, ClientePreco, Fornecedor, Funcionario, FuncionarioSalario, OficinaConfig, OrdemServico, OSAssinatura, OSFoto, OSItem,
+  OSMecanico, OSStatusHist, OSVeiculo, Perfil, ServicoCatalogo, SyncConflito, Veiculo, VeiculoClienteHist,
 } from '../domain/tipos'
 
 /** Tabelas que existem no aparelho e no servidor e são sincronizadas. */
@@ -11,7 +11,11 @@ export const ESQUEMA_SYNC = {
   funcionarios: 'id, updated_at',
   funcionarios_salario: 'id, updated_at, funcionario_id',
   clientes: 'id, updated_at, nome',
+  cliente_contatos: 'id, updated_at, cliente_id',
+  cliente_precos: 'id, updated_at, cliente_id',
+  fornecedores: 'id, updated_at, nome',
   veiculos: 'id, updated_at, cliente_id, placa',
+  veiculo_clientes_hist: 'id, updated_at, veiculo_id',
   servicos_catalogo: 'id, updated_at',
   os: 'id, updated_at, cliente_id, status, numero',
   os_veiculos: 'id, updated_at, os_id, veiculo_id',
@@ -33,7 +37,11 @@ export interface RegistrosPorTabela {
   funcionarios: Funcionario
   funcionarios_salario: FuncionarioSalario
   clientes: Cliente
+  cliente_contatos: ClienteContato
+  cliente_precos: ClientePreco
+  fornecedores: Fornecedor
   veiculos: Veiculo
+  veiculo_clientes_hist: VeiculoClienteHist
   servicos_catalogo: ServicoCatalogo
   os: OrdemServico
   os_veiculos: OSVeiculo
@@ -81,7 +89,8 @@ export class BancoLocal extends Dexie {
 
   constructor(nome: string) {
     super(nome)
-    this.version(1).stores({ ...ESQUEMA_SYNC, outbox: '++seq, registro_id', sync_erros: '++id', local: 'chave' })
+    // v2 (Fase 3): contatos, preços por cliente, fornecedores e histórico de dono do veículo
+    this.version(2).stores({ ...ESQUEMA_SYNC, outbox: '++seq, registro_id', sync_erros: '++id', local: 'chave' })
   }
 
   t<K extends TabelaSync>(nome: K) {
@@ -95,7 +104,8 @@ export class BancoNuvem extends Dexie {
 
   constructor(nome: string) {
     super(nome)
-    this.version(1).stores({ ...ESQUEMA_SYNC, contador: 'chave' })
+    // v2 (Fase 3): contatos, preços por cliente, fornecedores e histórico de dono do veículo
+    this.version(2).stores({ ...ESQUEMA_SYNC, contador: 'chave' })
   }
 
   t<K extends TabelaSync>(nome: K) {

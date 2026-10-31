@@ -15,7 +15,9 @@ const META = ['updated_at', 'updated_by', 'device_id', 'version', 'created_at', 
 const TABELAS_FILHAS_OS: TabelaSync[] = ['os_veiculos', 'os_mecanicos', 'os_itens', 'os_fotos', 'os_assinaturas', 'os_status_hist']
 const SO_DONO_LE: TabelaSync[] = ['funcionarios_salario', 'sync_conflitos', 'auditoria']
 const SO_DONO_GRAVA: TabelaSync[] = ['funcionarios_salario', 'oficina_config', 'perfis']
-const CADASTROS: TabelaSync[] = ['clientes', 'veiculos', 'servicos_catalogo', 'funcionarios']
+const CADASTROS: TabelaSync[] = ['clientes', 'cliente_contatos', 'cliente_precos', 'fornecedores', 'veiculos', 'veiculo_clientes_hist', 'servicos_catalogo', 'funcionarios']
+/** Mecânico não recebe preços nem fornecedores (não vê valores). */
+const MECANICO_NAO_LE: TabelaSync[] = ['cliente_precos', 'fornecedores']
 const STATUS_MECANICO: StatusOS[] = ['rascunho', 'execucao', 'aguardando', 'finalizada']
 const CAMPOS_FINANCEIROS_OS = ['desconto_pct', 'forma_pagamento', 'vencimento', 'pago_em', 'faturada_em', 'pedido_numero']
 
@@ -161,6 +163,7 @@ async function receber(desde: string | null, sessao: Sessao): Promise<Recebidos>
 
   for (const tabela of TABELAS_SYNC) {
     if (sessao.papel !== 'dono' && SO_DONO_LE.includes(tabela)) continue
+    if (mecanico && MECANICO_NAO_LE.includes(tabela)) continue
     const tab = nuvem.table(tabela)
     let linhas = (desde ? await tab.where('updated_at').above(desde).toArray() : await tab.toArray()) as Registro[]
 

@@ -94,6 +94,15 @@ const placa = () => {
   return rand() < 0.5 ? `${l()}${l()}${l()}-${entre(0, 9)}${l()}${entre(10, 99)}` : `${l()}${l()}${l()}-${entre(1000, 9999)}`
 }
 
+const FORNECEDORES: [string, string, string][] = [
+  ['Diesel Peças Bragança', 'autopecas', 'Bragança Paulista'], ['Auto Peças Rodovia', 'autopecas', 'Atibaia'],
+  ['Retífica Motores Paulista', 'retifica', 'Jundiaí'], ['Tornearia Precisão', 'torno', 'Itatiba'],
+  ['Solda & Cia', 'solda', 'Atibaia'], ['Auto Elétrica Faísca', 'eletrica', 'Bragança Paulista'],
+]
+
+/** Aumente ao mudar os dados de demonstração: aparelhos com versão antiga recriam a demo. */
+export const VERSAO_SEED = 2
+
 const RELATOS = [
   'Caminhão perdendo força em subida', 'Barulho na embreagem ao trocar marcha', 'Freio puxando para o lado',
   'Luz de injeção acesa no painel', 'Revisão programada de quilometragem', 'Vazamento de óleo no motor',
@@ -113,6 +122,11 @@ export async function servidorVazio() {
   return (await nuvem.t('perfis').count()) === 0
 }
 
+/** Dados de demonstração de versão anterior (sem as tabelas novas)? */
+export async function seedDesatualizado() {
+  return (((await nuvem.contador.get('seed'))?.valor as number) ?? 1) < VERSAO_SEED
+}
+
 /** Apaga tudo (servidor simulado e aparelho) e recria os dados de demonstração. */
 export async function recriarDemo() {
   await nuvem.transaction('rw', [...TABELAS_SYNC.map((t) => nuvem.table(t)), nuvem.contador], async () => {
@@ -125,6 +139,9 @@ export async function recriarDemo() {
     await db.sync_erros.clear()
   })
   await setLocal('ultimo_pull_servidor', null)
+  // Os usuários são recriados com novos IDs: a sessão salva deixa de valer.
+  await setLocal('sessao', null)
+  await setLocal('ultimo_usuario', null)
   await semearServidor()
 }
 
@@ -154,8 +171,15 @@ async function semear() {
   }
   const dono = mecanicos[0]
 
-  for (const [descricao, categoria, valor, tempo, garantia] of CATALOGO)
-    await g('servicos_catalogo', { id: uuid(), descricao, categoria, valor, tempo_estimado_min: tempo, garantia_dias: garantia })
+  const servicoIds: string[] = []
+  for (const [descricao, categoria, valor, tempo, garantia] of CATALOGO) {
+    const id = uuid()
+    servicoIds.push(id)
+    await g('servicos_catalogo', { id, descricao, categoria, valor, tempo_estimado_min: tempo, garantia_dias: garantia })
+  }
+
+  for (const [nome, tipo, cidade] of FORNECEDORES)
+    await g('fornecedores', { id: uuid(), nome, tipo, cidade, documento: gerarCNPJ(), telefone: `(11) 3${entre(100, 999)}-${entre(1000, 9999)}`, ativo: true })
 
   const clientes: { id: string; dados: ClienteSeed; veiculos: { id: string; km: number }[] }[] = []
   for (const c of CLIENTES) {
@@ -176,9 +200,20 @@ async function semear() {
         id: vid, cliente_id: id, marca, modelo, tipo, placa: placa(), ano: entre(2012, 2024), km,
         frota: c.tipo === 'PJ' ? String(100 + v) : undefined,
       })
+      await g('veiculo_clientes_hist', { id: uuid(), veiculo_id: vid, cliente_id: id, de: criado.toISOString() })
       veiculos.push({ id: vid, km })
     }
+    if (c.tipo === 'PJ') {
+      if (c.contato) await g('cliente_contatos', { id: uuid(), cliente_id: id, nome: c.contato, papel: 'frota', telefone: c.telefone, email: c.email })
+      await g('cliente_contatos', { id: uuid(), cliente_id: id, nome: pick(['Cláudia', 'Roberta', 'Sérgio', 'Patrícia']), papel: 'financeiro', email: `financeiro@${(c.fantasia ?? 'empresa').toLowerCase().normalize('NFD').replace(/[^a-z]/g, '')}.com.br` })
+    }
     clientes.push({ id, dados: c, veiculos })
+  }
+
+  // Tabela de preços própria para as maiores transportadoras
+  for (const [i, cli] of clientes.filter((c) => c.dados.modalidade !== 'avulso').slice(0, 3).entries()) {
+    await g('cliente_precos', { id: uuid(), cliente_id: cli.id, servico_id: null, valor_hora: 135 - i * 5, deslocamento_fixo: 180 })
+    for (const s of [0, 2, 6]) await g('cliente_precos', { id: uuid(), cliente_id: cli.id, servico_id: servicoIds[s], valor: Math.round(CATALOGO[s][2] * 0.9) })
   }
 
   let numero = 0
@@ -249,5 +284,6 @@ async function semear() {
     }
   }
   await nuvem.contador.put({ chave: 'os', valor: numero })
+  await nuvem.contador.put({ chave: 'seed', valor: VERSAO_SEED })
   horaServidor()
 }
