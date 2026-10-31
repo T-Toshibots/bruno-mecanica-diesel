@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Download, Plus, RotateCcw, Save, Trash2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Download, RotateCcw, Save } from 'lucide-react'
 import { tema } from '../../config/tema'
 import { db, TABELAS_SYNC } from '../../db/banco'
 import { useLista } from '../../db/consultas'
 import { recriarDemo } from '../../demo/seed'
 import type { OficinaConfig } from '../../domain/tipos'
-import { brl, dataHora, PAPEIS } from '../../lib/format'
-import { excluir, gravar } from '../../sync/motor'
+import { dataHora, PAPEIS } from '../../lib/format'
+import { gravar } from '../../sync/motor'
 import { Cabecalho, Campo, Secao, Vazio } from '../../components/ui'
 
 type DadosOficina = Omit<OficinaConfig, 'created_at' | 'updated_at' | 'version'>
@@ -16,12 +17,8 @@ export function Configuracoes() {
   const oficinaSalva = useLiveQuery(() => db.t('oficina_config').get('oficina'), [])
   const [oficina, setOficina] = useState<DadosOficina>({ id: 'oficina', ...tema.oficinaPadrao })
   const [salvo, setSalvo] = useState(false)
-  const funcionarios = useLista('funcionarios')
-  const salarios = useLista('funcionarios_salario')
   const perfis = useLista('perfis')
-  const catalogo = useLista('servicos_catalogo').sort((a, b) => a.descricao.localeCompare(b.descricao))
   const auditoria = useLiveQuery(async () => (await db.t('auditoria').orderBy('updated_at').reverse().limit(30).toArray()), [], [])
-  const [novoServ, setNovoServ] = useState({ descricao: '', categoria: 'Motor', valor: 0, garantia_dias: 90 })
 
   useEffect(() => { if (oficinaSalva) setOficina(oficinaSalva) }, [oficinaSalva])
 
@@ -58,6 +55,8 @@ export function Configuracoes() {
               <Campo key={k} rotulo={r}><input className="input" value={oficina[k]} onChange={(e) => setOficina({ ...oficina, [k]: e.target.value })} /></Campo>
             ))}
             <Campo rotulo="Valor hora padrão (R$)"><input className="input" type="number" value={oficina.valor_hora} onChange={(e) => setOficina({ ...oficina, valor_hora: Number(e.target.value) })} /></Campo>
+            <Campo rotulo="Deslocamento padrão (R$)"><input className="input" type="number" value={oficina.deslocamento_fixo ?? ''} onChange={(e) => setOficina({ ...oficina, deslocamento_fixo: Number(e.target.value) })} /></Campo>
+            <Campo rotulo="Deslocamento por km (R$)"><input className="input" type="number" step="0.1" value={oficina.valor_km ?? ''} onChange={(e) => setOficina({ ...oficina, valor_km: Number(e.target.value) })} /></Campo>
             <Campo rotulo="Texto de garantia (sai na OS)" className="sm:col-span-2">
               <textarea className="input min-h-20" value={oficina.garantia_texto} onChange={(e) => setOficina({ ...oficina, garantia_texto: e.target.value })} />
             </Campo>
@@ -83,58 +82,8 @@ export function Configuracoes() {
           <p className="mt-2 text-xs text-cinza">Usuário desativado perde o acesso na próxima sincronização.</p>
         </Secao>
 
-        <Secao titulo="Equipe e salários">
-          <div className="divide-y divide-borda">
-            {funcionarios.map((f) => {
-              const sal = salarios.find((s) => s.funcionario_id === f.id)
-              return (
-                <div key={f.id} className="flex items-center justify-between gap-2 py-2 text-sm">
-                  <div className="min-w-0">
-                    <div className="font-semibold text-forte">{f.nome}</div>
-                    <div className="truncate text-xs text-cinza">{f.funcao}{f.especialidades?.length ? ` · ${f.especialidades.join(', ')}` : ''}</div>
-                  </div>
-                  <input
-                    className="input w-32 text-right"
-                    type="number"
-                    defaultValue={sal?.salario ?? ''}
-                    placeholder="Salário"
-                    aria-label={`Salário de ${f.nome}`}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value)
-                      if (v !== (sal?.salario ?? 0)) gravar('funcionarios_salario', { id: sal?.id, funcionario_id: f.id, salario: v })
-                    }}
-                  />
-                </div>
-              )
-            })}
-          </div>
-          <p className="mt-2 text-xs text-cinza">Folha mensal: {brl(salarios.reduce((s, x) => s + x.salario, 0))}. Salários ficam numa tabela que só o Dono acessa.</p>
-        </Secao>
-
-        <Secao titulo="Catálogo de serviços">
-          <div className="max-h-80 divide-y divide-borda overflow-y-auto">
-            {catalogo.map((s) => (
-              <div key={s.id} className="flex items-center gap-2 py-2 text-sm">
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-forte">{s.descricao}</div>
-                  <div className="text-xs text-cinza">{s.categoria}{s.garantia_dias ? ` · garantia ${s.garantia_dias} dias` : ''}</div>
-                </div>
-                <input className="input w-28 text-right" type="number" step="0.01" defaultValue={s.valor} aria-label={`Preço de ${s.descricao}`}
-                  onBlur={(e) => Number(e.target.value) !== s.valor && gravar('servicos_catalogo', { id: s.id, valor: Number(e.target.value) })} />
-                <button onClick={() => excluir('servicos_catalogo', s.id)} className="flex h-11 w-11 items-center justify-center text-cinza hover:text-red-500" aria-label="Excluir"><Trash2 size={16} /></button>
-              </div>
-            ))}
-          </div>
-          <form className="mt-3 grid grid-cols-[1fr_7rem_auto] gap-2" onSubmit={async (e) => {
-            e.preventDefault()
-            if (!novoServ.descricao.trim()) return
-            await gravar('servicos_catalogo', novoServ)
-            setNovoServ({ ...novoServ, descricao: '', valor: 0 })
-          }}>
-            <input className="input" placeholder="Novo serviço" value={novoServ.descricao} onChange={(e) => setNovoServ({ ...novoServ, descricao: e.target.value })} />
-            <input className="input text-right" type="number" placeholder="R$" value={novoServ.valor || ''} onChange={(e) => setNovoServ({ ...novoServ, valor: Number(e.target.value) })} />
-            <button className="btn-secundario" aria-label="Adicionar"><Plus size={16} /></button>
-          </form>
+        <Secao titulo="Equipe e catálogo">
+          <p className="text-sm text-prata">Mecânicos, salários e o catálogo de serviços agora ficam em <Link to="/cadastros/equipe" className="text-brand underline">Cadastros → Equipe</Link> e <Link to="/cadastros/servicos" className="text-brand underline">Cadastros → Serviços</Link>.</p>
         </Secao>
 
         <div className="lg:col-span-2">

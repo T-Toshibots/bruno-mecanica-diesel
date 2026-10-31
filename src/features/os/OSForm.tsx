@@ -6,6 +6,7 @@ import { useSessao } from '../../app/sessao'
 import { db } from '../../db/banco'
 import { nomeCliente, useLista, useOSCompleta } from '../../db/consultas'
 import { totaisOS } from '../../domain/calculos'
+import { precoServico, valorDeslocamento, valorHora } from '../../domain/precos'
 import { osSchema, primeiroErro, veiculoSchema } from '../../domain/schemas'
 import type { OrdemServico, TipoItem, TipoVeiculo, Veiculo } from '../../domain/tipos'
 import { brl, FORMAS_PAGAMENTO, LOCAIS, mascaraPlaca, numeroOS, TIPOS_ITEM, TIPOS_OS, TIPOS_VEICULO } from '../../lib/format'
@@ -30,6 +31,8 @@ export function OSForm() {
   const clientes = useLista('clientes').filter((c) => c.ativo).sort((a, b) => nomeCliente(a).localeCompare(nomeCliente(b)))
   const funcionarios = useLista('funcionarios').filter((f) => f.ativo)
   const catalogo = useLista('servicos_catalogo')
+  const precos = useLista('cliente_precos')
+  const oficina = useLiveQuery(() => db.t('oficina_config').get('oficina'), [])
 
   const [cab, setCab] = useState<Cab>(CAB_INICIAL)
   const [veiculoId, setVeiculoId] = useState('')
@@ -92,6 +95,10 @@ export function OSForm() {
   }
 
   const totais = totaisOS(itens, cab.desconto_pct)
+  const padrao = { valor_hora: oficina?.valor_hora ?? 0, deslocamento_fixo: oficina?.deslocamento_fixo ?? 0, valor_km: oficina?.valor_km ?? 0 }
+  const tabelaPropria = !!cab.cliente_id && precos.some((p) => p.cliente_id === cab.cliente_id)
+  const precoDoServico = (s: { id: string; valor: number }) => precoServico(s, cab.cliente_id, precos).valor
+  const adicionarItem = (item: ItemForm) => setItens((l) => [...l.filter((i) => i.descricao.trim() || i.preco), item])
 
   const adicionarFotos = async (arquivos: FileList | null) => {
     if (!arquivos) return
@@ -253,7 +260,14 @@ export function OSForm() {
 
         <div className="lg:col-span-2">
           <Secao titulo="Serviços, peças e outros itens">
-            <ItensEditor itens={itens} onChange={setItens} catalogo={catalogo} verPreco={perm.precificar} verCusto={perm.verCusto} />
+            {perm.precificar && (
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <button type="button" className="btn-secundario" onClick={() => adicionarItem({ tipo: 'mao_obra', descricao: 'Hora técnica', qtd: 1, preco: valorHora(cab.cliente_id, precos, padrao).valor, custo: 0 })}><Plus size={16} /> Hora técnica</button>
+                <button type="button" className="btn-secundario" onClick={() => adicionarItem({ tipo: 'deslocamento', descricao: 'Deslocamento', qtd: 1, preco: valorDeslocamento(cab.cliente_id, precos, padrao).valor, custo: 0 })}><Plus size={16} /> Deslocamento</button>
+                {tabelaPropria && <span className="chip bg-brand/10 text-brand ring-brand/30">Tabela de preços do cliente aplicada</span>}
+              </div>
+            )}
+            <ItensEditor itens={itens} onChange={setItens} catalogo={catalogo} verPreco={perm.precificar} verCusto={perm.verCusto} precoDoServico={precoDoServico} />
           </Secao>
         </div>
 
@@ -317,15 +331,16 @@ export function OSForm() {
   )
 }
 
-function ItensEditor({ itens, onChange, catalogo, verPreco, verCusto }: {
+function ItensEditor({ itens, onChange, catalogo, verPreco, verCusto, precoDoServico }: {
   itens: ItemForm[]; onChange: (v: ItemForm[]) => void; catalogo: { id: string; descricao: string; valor: number }[]; verPreco: boolean; verCusto: boolean
+  precoDoServico: (s: { id: string; valor: number }) => number
 }) {
   const alterar = (i: number, campo: keyof ItemForm, valor: string) => {
     const novo = [...itens]
     if (campo === 'descricao') {
       novo[i] = { ...novo[i], descricao: valor }
       const cat = catalogo.find((s) => s.descricao === valor)
-      if (cat && verPreco && !novo[i].preco) novo[i].preco = cat.valor
+      if (cat && verPreco && !novo[i].preco) novo[i].preco = precoDoServico(cat)
     } else if (campo === 'tipo') {
       novo[i] = { ...novo[i], tipo: valor as TipoItem }
     } else {
@@ -343,7 +358,7 @@ function ItensEditor({ itens, onChange, catalogo, verPreco, verCusto }: {
   return (
     <div className="space-y-2">
       <datalist id="catalogo-servicos">
-        {catalogo.map((s) => <option key={s.id} value={s.descricao}>{verPreco ? brl(s.valor) : ''}</option>)}
+        {catalogo.map((s) => <option key={s.id} value={s.descricao}>{verPreco ? brl(precoDoServico(s)) : ''}</option>)}
       </datalist>
       {itens.map((it, i) => (
         <div key={it.id ?? i} className={`grid gap-2 rounded-lg border border-borda bg-painel p-2 sm:border-0 sm:bg-transparent sm:p-0 ${colunas}`}>

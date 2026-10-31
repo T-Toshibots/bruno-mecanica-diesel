@@ -6,6 +6,7 @@ import { emAberto } from '../../domain/financeiro'
 import type { Modalidade } from '../../domain/tipos'
 import { brl, CONDICOES, FORMAS_PAGAMENTO, MODALIDADES } from '../../lib/format'
 import { Cabecalho, Vazio } from '../../components/ui'
+import { CadastrosAbas } from '../../components/CadastrosAbas'
 
 export function Clientes() {
   const clientes = useLista('clientes').sort((a, b) => nomeCliente(a).localeCompare(nomeCliente(b)))
@@ -24,6 +25,7 @@ export function Clientes() {
 
   return (
     <>
+      <CadastrosAbas />
       <Cabecalho titulo="Clientes" subtitulo={`${clientes.length} cadastrados`} acoes={<Link to="/clientes/novo" className="btn-primario"><Plus size={18} /> Novo cliente</Link>} />
       <div className="mb-4 flex flex-col gap-2 sm:flex-row">
         <div className="relative flex-1">

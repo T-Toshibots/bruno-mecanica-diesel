@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
-  AlertTriangle, ClipboardList, CloudOff, Gauge, LogOut, Monitor, Moon, Plus, RefreshCw, Settings, Sun, Users, Wallet, Wifi,
+  AlertTriangle, ClipboardList, CloudOff, Database, Gauge, LogOut, Monitor, Moon, Plus, RefreshCw, Settings, Sun, Users, Wallet, Wifi,
 } from 'lucide-react'
 import { useSessao } from '../app/sessao'
 import { aplicarAtualizacao, useNovaVersao } from '../app/atualizacao'
@@ -91,11 +91,13 @@ export function Layout() {
     { to: '/', label: 'Painel', icone: Gauge, end: true },
     { to: '/os', label: perm.verTodasOS ? 'Ordens de Serviço' : 'Minhas OS', curto: perm.verTodasOS ? 'OS' : 'Minhas OS', icone: ClipboardList },
     ...(perm.verClientes ? [{ to: '/clientes', label: 'Clientes', icone: Users }] : []),
+    ...(perm.editarCadastros ? [{ to: '/cadastros/veiculos', label: 'Cadastros', icone: Database }] : []),
     ...(perm.verFinanceiro ? [{ to: '/financeiro', label: 'Financeiro', icone: Wallet }] : []),
     { to: '/sincronizacao', label: 'Sincronização', curto: 'Sincronizar', icone: RefreshCw },
     ...(perm.verConfiguracoes ? [{ to: '/config', label: 'Configurações', icone: Settings }] : []),
   ]
-  const inferior = nav.filter((n) => n.to !== '/config' && !(perm.verClientes && n.to === '/sincronizacao')).slice(0, 4)
+  // Celular: Cadastros fica nas abas da tela de Clientes
+  const inferior = nav.filter((n) => n.to !== '/config' && n.to !== '/cadastros/veiculos' && !(perm.verClientes && n.to === '/sincronizacao')).slice(0, 4)
   const novaOS = perm.verTodasOS ? 'Nova OS' : 'Abrir chamado'
 
   const pedirSaida = () => (status.pendentes > 0 ? setConfirmarSaida(true) : sair())

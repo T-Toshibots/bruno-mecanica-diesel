@@ -1,18 +1,14 @@
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { MessageCircle, Pencil, Plus, Trash2, Truck } from 'lucide-react'
+import { MessageCircle, Pencil, Plus, Truck } from 'lucide-react'
 import { db } from '../../db/banco'
 import { nomeCliente, useOSCompletas } from '../../db/consultas'
 import { emAberto, emAtraso } from '../../domain/financeiro'
-import { primeiroErro, veiculoSchema } from '../../domain/schemas'
-import type { TipoVeiculo, Veiculo } from '../../domain/tipos'
-import { brl, CONDICOES, data, FORMAS_PAGAMENTO, mascaraPlaca, MODALIDADES, TIPOS_VEICULO, whatsappLink } from '../../lib/format'
-import { excluir, gravar } from '../../sync/motor'
-import { Aviso, Cabecalho, Campo, Kpi, Modal, Secao, Vazio } from '../../components/ui'
+import { brl, CONDICOES, data, FORMAS_PAGAMENTO, MODALIDADES, PAPEIS_CONTATO, TIPOS_VEICULO, whatsappLink } from '../../lib/format'
+import { Cabecalho, Kpi, Secao, Vazio } from '../../components/ui'
+import { VeiculoModal, type VeiculoForm } from '../../components/VeiculoModal'
 import { OSCard } from '../../components/OSCard'
-
-type VeiculoForm = Partial<Veiculo> & { cliente_id: string }
 
 export function ClienteDetalhe() {
   const { id = '' } = useParams()
@@ -20,6 +16,9 @@ export function ClienteDetalhe() {
   const veiculos = useLiveQuery(async () => (await db.t('veiculos').where('cliente_id').equals(id).toArray()).filter((v) => !v.deleted_at), [id], [])
   const ordens = (useOSCompletas() ?? []).filter((o) => o.cliente_id === id)
   const [editando, setEditando] = useState<VeiculoForm | null>(null)
+  const contatos = useLiveQuery(async () => (await db.t('cliente_contatos').where('cliente_id').equals(id).toArray()).filter((x) => !x.deleted_at), [id], [])
+  const precos = useLiveQuery(async () => (await db.t('cliente_precos').where('cliente_id').equals(id).toArray()).filter((x) => !x.deleted_at), [id], [])
+  const catalogo = useLiveQuery(() => db.t('servicos_catalogo').toArray(), [], [])
 
   if (!cliente) return <div className="text-cinza">Carregando…</div>
 
@@ -67,6 +66,7 @@ export function ClienteDetalhe() {
           {cliente.observacoes && <p className="mt-3 rounded-lg bg-painel p-3 text-sm text-prata">{cliente.observacoes}</p>}
         </Secao>
 
+
         <div className="lg:col-span-2">
           <Secao titulo={`Frota (${veiculos.length})`} acoes={<button onClick={() => setEditando({ cliente_id: id, tipo: 'cavalo' })} className="btn-secundario"><Plus size={16} /> Veículo</button>}>
             {veiculos.length === 0 ? <Vazio texto="Nenhum veículo cadastrado." /> : (
@@ -86,6 +86,40 @@ export function ClienteDetalhe() {
         </div>
       </div>
 
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <Secao titulo={`Contatos (${contatos.length})`}>
+          {contatos.length === 0 ? <Vazio texto="Nenhum contato além do principal." /> : (
+            <ul className="divide-y divide-borda text-sm">
+              {contatos.map((ct) => (
+                <li key={ct.id} className="flex items-center justify-between gap-2 py-2">
+                  <span className="min-w-0">
+                    <span className="block font-semibold text-forte">{ct.nome} <span className="text-xs font-normal text-brand">· {PAPEIS_CONTATO[ct.papel]}</span></span>
+                    <span className="block truncate text-xs text-cinza">{[ct.telefone, ct.email].filter(Boolean).join(' · ')}</span>
+                  </span>
+                  {ct.telefone && <a href={whatsappLink(ct.telefone, `Olá ${ct.nome}, tudo bem?`)} target="_blank" rel="noreferrer" className="flex h-11 w-11 shrink-0 items-center justify-center text-cinza hover:text-brand" aria-label={`WhatsApp de ${ct.nome}`}><MessageCircle size={18} /></a>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Secao>
+        <Secao titulo="Tabela de preços">
+          {precos.length === 0 ? <Vazio texto="Usa os preços padrão da oficina." /> : (
+            <dl className="space-y-2 text-sm">
+              {precos.filter((p) => !p.servico_id).map((g) => (
+                <div key={g.id} className="space-y-2">
+                  {g.valor_hora != null && <Info r="Hora técnica" v={brl(g.valor_hora)} />}
+                  {g.deslocamento_fixo != null && <Info r="Deslocamento fixo" v={brl(g.deslocamento_fixo)} />}
+                  {g.valor_km != null && <Info r="Deslocamento por km" v={brl(g.valor_km)} />}
+                </div>
+              ))}
+              {precos.filter((p) => p.servico_id).map((p) => (
+                <Info key={p.id} r={catalogo.find((s) => s.id === p.servico_id)?.descricao ?? 'Serviço'} v={brl(p.valor ?? 0)} />
+              ))}
+            </dl>
+          )}
+        </Secao>
+      </div>
+
       <div className="mt-4">
         <Secao titulo={`Histórico de OS (${ordens.length})`}>
           {ordens.length === 0 ? <Vazio texto="Nenhuma OS para este cliente." /> : (
@@ -102,44 +136,4 @@ export function ClienteDetalhe() {
 function Info({ r, v }: { r: string; v?: string }) {
   if (!v) return null
   return <div className="flex justify-between gap-3"><dt className="text-cinza">{r}</dt><dd className="text-right text-forte">{v}</dd></div>
-}
-
-function VeiculoModal({ veiculo, onFechar }: { veiculo: VeiculoForm; onFechar: () => void }) {
-  const [v, setV] = useState(veiculo)
-  const [erro, setErro] = useState('')
-  const set = <K extends keyof VeiculoForm>(k: K, val: VeiculoForm[K]) => setV((p) => ({ ...p, [k]: val }))
-  const num = (s: string) => (s === '' ? undefined : Number(s))
-
-  const salvar = async (e: FormEvent) => {
-    e.preventDefault()
-    const msg = primeiroErro(veiculoSchema.safeParse(v))
-    if (msg) return setErro(msg)
-    await gravar('veiculos', v)
-    onFechar()
-  }
-
-  return (
-    <Modal aberto titulo={v.id ? 'Editar veículo' : 'Novo veículo'} onFechar={onFechar}>
-      <form onSubmit={salvar} className="grid grid-cols-2 gap-3">
-        <Campo rotulo="Placa"><input className="input uppercase" value={v.placa ?? ''} onChange={(e) => set('placa', mascaraPlaca(e.target.value))} /></Campo>
-        <Campo rotulo="Tipo">
-          <select className="input" value={v.tipo} onChange={(e) => set('tipo', e.target.value as TipoVeiculo)}>
-            {Object.entries(TIPOS_VEICULO).map(([k, t]) => <option key={k} value={k}>{t}</option>)}
-          </select>
-        </Campo>
-        <Campo rotulo="Marca"><input className="input" value={v.marca ?? ''} onChange={(e) => set('marca', e.target.value)} /></Campo>
-        <Campo rotulo="Modelo"><input className="input" value={v.modelo ?? ''} onChange={(e) => set('modelo', e.target.value)} /></Campo>
-        <Campo rotulo="Ano"><input className="input" type="number" value={v.ano ?? ''} onChange={(e) => set('ano', num(e.target.value))} /></Campo>
-        <Campo rotulo="Nº frota"><input className="input" value={v.frota ?? ''} onChange={(e) => set('frota', e.target.value)} /></Campo>
-        <Campo rotulo="KM atual"><input className="input" type="number" value={v.km ?? ''} onChange={(e) => set('km', num(e.target.value))} /></Campo>
-        <Campo rotulo="Horímetro"><input className="input" type="number" value={v.horimetro ?? ''} onChange={(e) => set('horimetro', num(e.target.value))} /></Campo>
-        <Campo rotulo="Chassi" className="col-span-2"><input className="input uppercase" value={v.chassi ?? ''} onChange={(e) => set('chassi', e.target.value.toUpperCase())} /></Campo>
-        {erro && <div className="col-span-2"><Aviso tipo="erro">{erro}</Aviso></div>}
-        <div className="col-span-2 mt-2 flex gap-2">
-          {v.id && <button type="button" onClick={async () => { if (confirm('Excluir este veículo?')) { await excluir('veiculos', v.id!); onFechar() } }} className="btn-perigo" aria-label="Excluir"><Trash2 size={16} /></button>}
-          <button className="btn-primario flex-1">Salvar veículo</button>
-        </div>
-      </form>
-    </Modal>
-  )
 }
