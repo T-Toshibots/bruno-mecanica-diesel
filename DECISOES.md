@@ -24,3 +24,16 @@ Registro das decisões tomadas durante o desenvolvimento (regra 2 do prompt).
 12. **Background Sync não implementado ainda:** com o servidor simulado não há o que enviar em segundo plano. Fica para quando o Supabase for ligado (exige service worker próprio). Os gatilhos ativos são: abertura, gravação, volta da internet, volta ao primeiro plano, a cada 60s e o botão manual.
 13. **Tema escuro como padrão** (identidade da marca), com tema claro de alto contraste para uso no sol e opção "seguir o sistema".
 14. **Login da demonstração por escolha de perfil**, sem senha, para mostrar as permissões. Com o Supabase, entra e-mail e senha.
+
+## Decididas na Fase 3
+
+15. **Tabela de preços por cliente** em `cliente_precos`: uma linha geral (hora técnica, deslocamento fixo ou por km) e linhas por serviço. Ordem de prioridade: preço do cliente → catálogo/padrão da oficina. A OS aplica sozinha ao escolher o serviço e mostra "Tabela de preços do cliente aplicada".
+16. **Deslocamento padrão** (fixo e por km) passou a fazer parte dos dados da oficina (Configurações).
+17. **Troca de dono do veículo** fecha o período no `veiculo_clientes_hist` e abre outro. As OS antigas continuam com o cliente da época.
+18. **Catálogo de serviços e equipe/salários saíram de Configurações** e foram para **Cadastros** (mais completos). Nada foi removido: só mudou de lugar. A secretária cadastra mecânicos, mas o campo de salário só aparece para o Dono.
+19. **Mecânico não recebe preços nem fornecedores**, mas recebe os contatos dos clientes (para falar com o responsável de frota em campo).
+20. **CPF/CNPJ e placa não podem repetir** (checado na tela; no Supabase, índice único).
+21. **Importação:** uma linha por veículo, clientes agrupados pelo CPF/CNPJ. Colunas reconhecidas por vários nomes ("Razão Social", "CNPJ", "Nº Frota"…). CSV com `;` ou `,`, em UTF-8 ou Windows-1252 (Excel antigo), ou `.xlsx`. Linhas com erro são mostradas e ignoradas. Clientes importados entram como frotista/boleto/30 dias (PJ) ou avulso/Pix/à vista (PF) e podem ser ajustados depois. Placa já cadastrada não é duplicada.
+22. **Leitura de Excel** com `read-excel-file`, carregada só na tela de importação para não pesar o app.
+23. **CEP (ViaCEP) e CNPJ (BrasilAPI)** só com internet; offline aparece "preencha manualmente". O CEP busca sozinho ao sair do campo, se o endereço estiver vazio.
+24. **Dados de demonstração versionados** (`VERSAO_SEED`): aparelhos com a demo antiga recriam a demonstração na abertura, só se não houver pendências. Ao recriar, a sessão é encerrada (os usuários ganham novos IDs).

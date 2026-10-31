@@ -11,7 +11,8 @@ Sistema de ordens de serviço, clientes e financeiro para mecânica diesel pesad
 |---|---|
 | 1. Planejamento | ✅ aprovado |
 | 2. Fundação (perfis, banco local, sincronização, testes) | ✅ em **modo demonstração** (sem Supabase) |
-| 3 a 9 | a fazer |
+| 3. Cadastros (preços por cliente, contatos, fornecedores, equipe, catálogo, importação) | ✅ |
+| 4 a 9 | a fazer |
 
 ## Requisitos
 
@@ -31,8 +32,8 @@ Abra o endereço mostrado no terminal e escolha um perfil para entrar (Dono, Sec
 ## Testes
 
 ```bash
-npm test            # unitários: cálculos, validações, permissões, sincronização, conflitos e numeração offline
-npm run test:e2e    # ponta a ponta no Chrome: chamado criado offline, número oficial e permissões
+npm test            # unitários: cálculos, preços por cliente, importação, permissões, sincronização, conflitos, numeração offline
+npm run test:e2e    # ponta a ponta no Chrome: chamado offline, permissões, importação de planilha, tabela de preços
 ```
 
 ## Publicar
@@ -51,6 +52,10 @@ Nenhuma no modo demonstração. Quando o Supabase for ligado:
 | `VITE_SUPABASE_ANON_KEY` | chave **anon** (pública). A chave `service_role` nunca vai para o código. |
 
 O SQL do banco está em `supabase/migrations/` (preparado, ainda não executado em um projeto real).
+
+## Importar clientes e veículos
+
+Cadastros → **Importar** → **Baixar modelo**. Preencha no Excel (uma linha por veículo), salve como .xlsx ou CSV e envie. O sistema mostra uma prévia com os erros antes de gravar.
 
 ## Trocar a marca (outra oficina)
 
