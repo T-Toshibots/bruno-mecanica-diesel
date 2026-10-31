@@ -76,7 +76,11 @@ export function OSForm() {
   const existente = useOSCompleta(id)
   const todas = useOSCompletas()
   const clientes = useLista('clientes').filter((c) => c.ativo).sort((a, b) => nomeCliente(a).localeCompare(nomeCliente(b)))
-  const funcionarios = useLista('funcionarios').filter((f) => f.ativo)
+  const perfis = useLista('perfis')
+  // Só quem executa serviço (secretária não entra na lista de mecânicos)
+  const funcionarios = useLista('funcionarios').filter((f) => f.ativo && perfis.find((p) => p.funcionario_id === f.id)?.papel !== 'secretaria')
+  /** Quem abre a OS já fica como responsável, exceto a secretária. */
+  const mecanicoPadrao = sessao.funcionario_id && sessao.papel !== 'secretaria' ? [sessao.funcionario_id] : []
   const catalogo = useLista('servicos_catalogo')
   const precos = useLista('cliente_precos')
   const fornecedores = useLista('fornecedores').filter((f) => f.ativo)
@@ -85,7 +89,7 @@ export function OSForm() {
   const [cab, setCab] = useState<Cab>(CAB_INICIAL)
   const [veiculosOS, setVeiculosOS] = useState<VeiculoOSForm[]>([])
   const [novoVeiculo, setNovoVeiculo] = useState<Partial<Veiculo> | null>(null)
-  const [mecanicos, setMecanicos] = useState<string[]>(sessao.funcionario_id ? [sessao.funcionario_id] : [])
+  const [mecanicos, setMecanicos] = useState<string[]>(mecanicoPadrao)
   const [itens, setItens] = useState<ItemForm[]>([ITEM_VAZIO])
   const [fotos, setFotos] = useState<FotoForm[]>([])
   const [momento, setMomento] = useState<MomentoFoto>('antes')
@@ -100,7 +104,7 @@ export function OSForm() {
   /** Estado logo após carregar: só salva rascunho se o usuário mudar algo. */
   const inicial = useRef<string | null>(null)
   /** Estado vazio da montagem: se nada for carregado, qualquer digitação (mesmo antes de carregar) conta como mudança. */
-  const vazio = useRef(retrato(CAB_INICIAL, [], sessao.funcionario_id ? [sessao.funcionario_id] : [], [ITEM_VAZIO], [], { nome: '' }))
+  const vazio = useRef(retrato(CAB_INICIAL, [], mecanicoPadrao, [ITEM_VAZIO], [], { nome: '' }))
   const chaveRascunho = `rascunho_os_${id ?? 'nova'}`
 
   const fotosExist = useLiveQuery(async () => (id ? (await db.t('os_fotos').where('os_id').equals(id).toArray()).filter((f) => !f.deleted_at) : []), [id], [])
