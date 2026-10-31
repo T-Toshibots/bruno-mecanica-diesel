@@ -159,6 +159,20 @@ describe('conflitos e travas', () => {
   })
 })
 
+describe('troca de usuário', () => {
+  it('sincronização em andamento do usuário anterior não impede o novo usuário de baixar os dados dele', async () => {
+    await entrarComo('mec1')
+    const emCurso = sincronizar({ forcar: true }) // ainda do mecânico
+    // troca para a secretária enquanto a sincronização do mecânico está em andamento
+    await db.transaction('rw', TABELAS_SYNC.map((t) => db.table(t)), async () => { for (const t of TABELAS_SYNC) await db.table(t).clear() })
+    await db.local.delete('ultimo_pull_servidor')
+    await salvarSessao(SESSOES.secretaria)
+    await sincronizar({ forcar: true })
+    await emCurso
+    expect((await db.t('os').toArray()).map((o) => o.id).sort()).toEqual(['os-1', 'os-2', 'os-fin'])
+  })
+})
+
 describe('permissões no servidor', () => {
   it('mecânico recebe só as próprias OS, sem valores e sem salários', async () => {
     await entrarComo('mec1')

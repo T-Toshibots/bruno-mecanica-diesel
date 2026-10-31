@@ -21,6 +21,9 @@ test('mecânico abre chamado sem internet; ao reconectar recebe número oficial 
   await expect(page.getByRole('link', { name: 'Financeiro' })).toHaveCount(0)
   await expect(page.locator('main')).not.toContainText('R$')
 
+  // O app precisa estar guardado para uso offline antes do modo avião (como no celular: abrir uma vez com internet)
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => true))
+
   // Modo avião
   await context.setOffline(true)
   await expect(page.getByRole('link', { name: /Offline/ })).toBeVisible()
