@@ -29,6 +29,10 @@ export interface Transporte {
   nome: 'demo' | 'supabase'
   enviar(itens: ItemEnvio[], sessao: Sessao): Promise<ResultadoEnvio[]>
   receber(desde: string | null, sessao: Sessao): Promise<Recebidos>
+  /** Fotos: envio para o Storage (Supabase Storage na versão com servidor). */
+  enviarArquivo(id: string, blob: Blob, tipo: string, sessao: Sessao): Promise<void>
+  /** Baixa a foto completa quando ela não está no aparelho (null = não existe). */
+  baixarArquivo(id: string): Promise<Blob | null>
 }
 
 export class ErroRede extends Error {

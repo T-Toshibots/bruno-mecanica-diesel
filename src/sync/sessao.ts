@@ -10,7 +10,7 @@ import { sincronizar } from './sincronizar'
 export async function entrar(perfil: Perfil) {
   const sessao: Sessao = { usuario_id: perfil.id, nome: perfil.nome, papel: perfil.papel, funcionario_id: perfil.funcionario_id }
   const anterior = await getLocal<string | null>('ultimo_usuario', null)
-  if (anterior && anterior !== perfil.id && (await db.outbox.count()) === 0) {
+  if (anterior && anterior !== perfil.id && (await podeSairSemPerda())) {
     await db.transaction('rw', TABELAS_SYNC.map((t) => db.table(t)), async () => {
       for (const t of TABELAS_SYNC) await db.table(t).clear()
     })
@@ -24,7 +24,7 @@ export async function entrar(perfil: Perfil) {
 
 /** Nunca apaga dados não sincronizados: com pendências, só sai com confirmação explícita (os dados ficam no aparelho). */
 export async function podeSairSemPerda() {
-  return (await db.outbox.count()) === 0
+  return (await db.outbox.count()) === 0 && (await db.arquivos.where('enviado').equals(0).count()) === 0
 }
 
 export async function sair() {

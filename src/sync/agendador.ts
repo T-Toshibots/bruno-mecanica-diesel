@@ -41,9 +41,11 @@ export function useOnline() {
 export function useStatusSync() {
   const online = useOnline()
   const estado = useSyncExternalStore(assinarEstadoSync, getEstadoSync)
-  const pendentes = useLiveQuery(() => db.outbox.count(), [], 0)
+  const registros = useLiveQuery(() => db.outbox.count(), [], 0)
+  const fotosPendentes = useLiveQuery(() => db.arquivos.where('enviado').equals(0).count(), [], 0)
+  const pendentes = registros + fotosPendentes
   const maisAntiga = useLiveQuery(async () => (await db.outbox.orderBy('seq').first())?.criado_em, [], undefined)
   const erros = useLiveQuery(() => db.sync_erros.count(), [], 0)
   const pendenciaAntiga = !!maisAntiga && Date.now() - new Date(maisAntiga).getTime() > ALERTA_PENDENCIA_MS
-  return { online, ...estado, pendentes, erros, maisAntiga, pendenciaAntiga }
+  return { online, ...estado, pendentes, registros, fotosPendentes, erros, maisAntiga, pendenciaAntiga }
 }

@@ -12,7 +12,7 @@ import { estaOnline } from './rede'
 import { ErroRede, type ItemEnvio, type Recebidos, type Registro, type ResultadoEnvio, type Transporte } from './transporte'
 
 const META = ['updated_at', 'updated_by', 'device_id', 'version', 'created_at', 'created_by']
-const TABELAS_FILHAS_OS: TabelaSync[] = ['os_veiculos', 'os_mecanicos', 'os_itens', 'os_fotos', 'os_assinaturas', 'os_status_hist']
+const TABELAS_FILHAS_OS: TabelaSync[] = ['os_veiculos', 'os_mecanicos', 'os_itens', 'os_fotos', 'os_assinaturas', 'os_status_hist', 'os_apontamentos', 'os_aprovacoes']
 const SO_DONO_LE: TabelaSync[] = ['funcionarios_salario', 'sync_conflitos', 'auditoria']
 const SO_DONO_GRAVA: TabelaSync[] = ['funcionarios_salario', 'oficina_config', 'perfis']
 const CADASTROS: TabelaSync[] = ['clientes', 'cliente_contatos', 'cliente_precos', 'fornecedores', 'veiculos', 'veiculo_clientes_hist', 'servicos_catalogo', 'funcionarios']
@@ -69,6 +69,8 @@ async function verificarPermissao(sessao: Sessao, tabela: TabelaSync, novo: Regi
   if (TABELAS_FILHAS_OS.includes(tabela)) {
     const osId = String(novo.os_id)
     if (!meus.has(osId)) return 'Esta OS não está atribuída a você.'
+    if (tabela === 'os_aprovacoes') return 'Mecânico não registra aprovação de orçamento.'
+    if (tabela === 'os_apontamentos' && novo.funcionario_id !== sessao.funcionario_id) return 'Você só pode apontar as suas próprias horas.'
   }
   return null
 }
@@ -204,6 +206,15 @@ export const transporteDemo: Transporte = {
     if (!estaOnline()) throw new ErroRede()
     await espera(150)
     return receber(desde, sessao)
+  },
+  async enviarArquivo(id, blob, tipo) {
+    if (!estaOnline()) throw new ErroRede()
+    await espera(300)
+    await nuvem.storage.put({ id, blob, tipo })
+  },
+  async baixarArquivo(id) {
+    if (!estaOnline()) throw new ErroRede()
+    return (await nuvem.storage.get(id))?.blob ?? null
   },
 }
 

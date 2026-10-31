@@ -59,6 +59,12 @@ export function excluir(tabela: TabelaSync, id: string) {
   return gravar(tabela, { id, deleted_at: new Date().toISOString() } as Dados<typeof tabela>)
 }
 
+/** Guarda a foto completa no aparelho e coloca na fila de arquivos (enviada depois dos registros). */
+export async function guardarArquivo(id: string, osId: string, blob: Blob) {
+  await db.arquivos.put({ id, os_id: osId, blob, tipo: blob.type || 'image/jpeg', enviado: 0, criado_em: new Date().toISOString() })
+  aoGravar?.()
+}
+
 /** Número provisório da OS criada no aparelho: P-<aparelho>-0007. */
 export async function proximoNumeroProvisorio() {
   const device = await getDeviceId()

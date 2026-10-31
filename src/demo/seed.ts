@@ -3,7 +3,7 @@ import { db, nuvem, setLocal, TABELAS_SYNC } from '../db/banco'
 import { calcularVencimento } from '../domain/calculos'
 import { STATUS_TRAVADOS } from '../domain/permissoes'
 import type {
-  Cliente, CondicaoFaturamento, FormaPagamento, LocalOS, Modalidade, StatusOS, TipoItem, TipoOS, TipoVeiculo,
+  Cliente, CondicaoFaturamento, FormaPagamento, LocalOS, Modalidade, StatusOS, TipoOS, TipoVeiculo,
 } from '../domain/tipos'
 import { tema } from '../config/tema'
 import { gravarNoServidor, horaServidor } from '../sync/servidor-demo'
@@ -101,7 +101,7 @@ const FORNECEDORES: [string, string, string][] = [
 ]
 
 /** Aumente ao mudar os dados de demonstração: aparelhos com versão antiga recriam a demo. */
-export const VERSAO_SEED = 2
+export const VERSAO_SEED = 3
 
 const RELATOS = [
   'Caminhão perdendo força em subida', 'Barulho na embreagem ao trocar marcha', 'Freio puxando para o lado',
@@ -129,14 +129,16 @@ export async function seedDesatualizado() {
 
 /** Apaga tudo (servidor simulado e aparelho) e recria os dados de demonstração. */
 export async function recriarDemo() {
-  await nuvem.transaction('rw', [...TABELAS_SYNC.map((t) => nuvem.table(t)), nuvem.contador], async () => {
+  await nuvem.transaction('rw', [...TABELAS_SYNC.map((t) => nuvem.table(t)), nuvem.contador, nuvem.storage], async () => {
     for (const t of TABELAS_SYNC) await nuvem.table(t).clear()
     await nuvem.contador.clear()
+    await nuvem.storage.clear()
   })
-  await db.transaction('rw', [...TABELAS_SYNC.map((t) => db.table(t)), db.outbox, db.sync_erros], async () => {
+  await db.transaction('rw', [...TABELAS_SYNC.map((t) => db.table(t)), db.outbox, db.sync_erros, db.arquivos], async () => {
     for (const t of TABELAS_SYNC) await db.table(t).clear()
     await db.outbox.clear()
     await db.sync_erros.clear()
+    await db.arquivos.clear()
   })
   await setLocal('ultimo_pull_servidor', null)
   // Os usuários são recriados com novos IDs: a sessão salva deixa de valer.
@@ -178,10 +180,16 @@ async function semear() {
     await g('servicos_catalogo', { id, descricao, categoria, valor, tempo_estimado_min: tempo, garantia_dias: garantia })
   }
 
-  for (const [nome, tipo, cidade] of FORNECEDORES)
-    await g('fornecedores', { id: uuid(), nome, tipo, cidade, documento: gerarCNPJ(), telefone: `(11) 3${entre(100, 999)}-${entre(1000, 9999)}`, ativo: true })
+  const fornecedores: { id: string; tipo: string }[] = []
+  for (const [nome, tipo, cidade] of FORNECEDORES) {
+    const id = uuid()
+    fornecedores.push({ id, tipo })
+    await g('fornecedores', { id, nome, tipo, cidade, documento: gerarCNPJ(), telefone: `(11) 3${entre(100, 999)}-${entre(1000, 9999)}`, ativo: true })
+  }
+  const autopecas = fornecedores.filter((f) => f.tipo === 'autopecas')
+  const retifica = fornecedores.find((f) => f.tipo === 'retifica')!
 
-  const clientes: { id: string; dados: ClienteSeed; veiculos: { id: string; km: number }[] }[] = []
+  const clientes: { id: string; dados: ClienteSeed; veiculos: { id: string; km: number; tipo: TipoVeiculo }[] }[] = []
   for (const c of CLIENTES) {
     const id = uuid()
     const criado = new Date(hoje)
@@ -190,10 +198,11 @@ async function semear() {
       id, ...c, documento: c.tipo === 'PJ' ? gerarCNPJ() : gerarCPF(), exige_pedido: !!c.exige_pedido,
       ativo: true, created_at: criado.toISOString(),
     })
-    const veiculos: { id: string; km: number }[] = []
+    const veiculos: { id: string; km: number; tipo: TipoVeiculo }[] = []
     const qtd = c.tipo === 'PF' ? 1 : entre(2, 4)
     for (let v = 0; v < qtd; v++) {
-      const [marca, modelo, tipo] = pick(MODELOS)
+      // Transportadoras: primeiro um cavalo e depois a carreta dele, para haver OS com conjunto
+      const [marca, modelo, tipo] = c.tipo === 'PJ' && v === 0 ? MODELOS[0] : c.tipo === 'PJ' && v === 1 ? MODELOS[9] : pick(MODELOS)
       const vid = uuid()
       const km = entre(80, 900) * 1000
       await g('veiculos', {
@@ -201,7 +210,7 @@ async function semear() {
         frota: c.tipo === 'PJ' ? String(100 + v) : undefined,
       })
       await g('veiculo_clientes_hist', { id: uuid(), veiculo_id: vid, cliente_id: id, de: criado.toISOString() })
-      veiculos.push({ id: vid, km })
+      veiculos.push({ id: vid, km, tipo })
     }
     if (c.tipo === 'PJ') {
       if (c.contato) await g('cliente_contatos', { id: uuid(), cliente_id: id, nome: c.contato, papel: 'frota', telefone: c.telefone, email: c.email })
@@ -217,6 +226,7 @@ async function semear() {
   }
 
   let numero = 0
+  let retornoCandidato: { osId: string; cli: (typeof clientes)[number]; conjunto: (typeof clientes)[number]['veiculos']; osVeicIds: string[]; itens: Record<string, unknown>[]; mec: { id: string } } | null = null
   for (let m = 11; m >= 0; m--) {
     const qtdMes = entre(4, 6) + Math.round((11 - m) / 3)
     for (let k = 0; k < qtdMes; k++) {
@@ -225,20 +235,31 @@ async function semear() {
       if (m === 0 && k < 6) aberta.setTime(hoje.getTime() - k * 1.4 * 86400000 - entre(1, 6) * 3600000)
       const cli = pick(clientes)
       const veic = pick(cli.veiculos)
+      // ~30% das OS de transportadora atendem o conjunto cavalo + carreta
+      const carreta = cli.veiculos.find((v) => v.tipo === 'carreta')
+      const conjunto = veic.tipo === 'cavalo' && carreta && rand() < 0.3 ? [veic, carreta] : [veic]
+      const osVeicIds = conjunto.map(() => uuid())
       const tipo: TipoOS = pick(['preventiva', 'corretiva', 'corretiva', 'socorro'])
       const local: LocalOS = tipo === 'socorro' ? 'estrada' : pick(['oficina', 'oficina', 'patio'])
       const mec = pick(mecanicos)
 
-      const itens: { tipo: TipoItem; descricao: string; qtd: number; preco: number; custo: number }[] = []
+      const itens: Record<string, unknown>[] = []
       for (let s = 0; s < entre(1, 3); s++) {
-        const sv = pick([...CATALOGO])
-        itens.push({ tipo: 'mao_obra', descricao: sv[0], qtd: 1, preco: sv[2], custo: 0 })
+        const idx = Math.floor(rand() * CATALOGO.length)
+        const sv = CATALOGO[idx]
+        itens.push({ tipo: 'mao_obra', descricao: sv[0], qtd: 1, preco: sv[2], custo: 0, servico_id: servicoIds[idx], garantia_dias: sv[4], os_veiculo_id: pick(osVeicIds) })
       }
       for (let p = 0; p < entre(0, 3); p++) {
         const [desc, preco] = pick(PECAS)
         const qtd = desc.includes('litro') ? 30 : 1
-        itens.push({ tipo: 'peca', descricao: desc, qtd, preco, custo: Math.round(preco * 0.62) })
+        const doCliente = rand() < 0.1
+        itens.push({
+          tipo: 'peca', descricao: desc, qtd, preco: doCliente ? 0 : preco, custo: doCliente ? 0 : Math.round(preco * 0.62),
+          codigo: `REF-${entre(1000, 9999)}`, origem: doCliente ? 'cliente' : 'oficina', fornecedor_id: doCliente ? undefined : pick(autopecas).id,
+          os_veiculo_id: osVeicIds[0],
+        })
       }
+      if (rand() < 0.12) itens.push({ tipo: 'terceiro', descricao: 'Retífica do cabeçote (terceiro)', qtd: 1, preco: 2400, custo: 1800, fornecedor_id: retifica.id, os_veiculo_id: osVeicIds[0] })
       if (local !== 'oficina') itens.push({ tipo: tipo === 'socorro' ? 'socorro' : 'deslocamento', descricao: tipo === 'socorro' ? 'Socorro na estrada' : 'Deslocamento até o pátio', qtd: 1, preco: entre(2, 8) * 75, custo: 0 })
 
       const dias = (hoje.getTime() - aberta.getTime()) / 86400000
@@ -277,10 +298,52 @@ async function semear() {
         }
       }
       await g('os', os)
-      await g('os_veiculos', { id: uuid(), os_id: osId, veiculo_id: veic.id, km: veic.km - entre(1, 30) * 1000 })
+      for (const [i, v] of conjunto.entries())
+        await g('os_veiculos', { id: osVeicIds[i], os_id: osId, veiculo_id: v.id, km: v.tipo === 'carreta' ? undefined : v.km - entre(1, 30) * 1000 })
       await g('os_mecanicos', { id: uuid(), os_id: osId, funcionario_id: mec.id })
       for (const [ordem, it] of itens.entries()) await g('os_itens', { id: uuid(), os_id: osId, ordem, ...it })
       await g('os_status_hist', { id: uuid(), os_id: osId, de: null, para: status, usuario_nome: dono.nome, data: aberta.toISOString() })
+
+      if (!['rascunho', 'orcamento', 'cancelada'].includes(status)) {
+        const aprov = new Date(aberta.getTime() + entre(1, 5) * 3600000)
+        await g('os_aprovacoes', {
+          id: uuid(), os_id: osId, aprovado_por: cli.dados.contato ?? cli.dados.nome, meio: pick(['whatsapp', 'whatsapp', 'telefone', 'presencial']),
+          pedido_numero: os.pedido_numero, data: (aprov > hoje ? hoje : aprov).toISOString(), usuario_nome: 'Ana Paula',
+        })
+      }
+      if (['execucao', 'aguardando', 'finalizada', 'faturada'].includes(status)) {
+        let inicio = new Date(aberta.getTime() + 2 * 3600000)
+        for (let a = 0; a < entre(1, 3); a++) {
+          if (inicio > hoje) break
+          const fim = new Date(inicio.getTime() + entre(60, 240) * 60000)
+          const emAndamento = status === 'execucao' && dias < 1.5 && a === 0
+          await g('os_apontamentos', { id: uuid(), os_id: osId, funcionario_id: mec.id, inicio: inicio.toISOString(), fim: emAndamento || fim > hoje ? null : fim.toISOString() })
+          if (emAndamento) break
+          inicio = new Date(fim.getTime() + 18 * 3600000)
+        }
+      }
+      if (status === 'faturada' && dias < 40 && !retornoCandidato) retornoCandidato = { osId, cli, conjunto, osVeicIds, itens, mec }
+    }
+  }
+
+  // Um retorno em garantia em andamento, vinculado a uma OS faturada recente
+  if (retornoCandidato) {
+    const r = retornoCandidato
+    const servico = r.itens.find((i) => i.tipo === 'mao_obra' && i.garantia_dias)
+    if (servico) {
+      numero++
+      const osId = uuid()
+      const aberta = new Date(hoje.getTime() - 5 * 3600000)
+      const ovId = uuid()
+      await g('os', {
+        id: osId, numero, numero_provisorio: `P-DEMO-${String(numero).padStart(4, '0')}`, status: 'execucao', cliente_id: r.cli.id,
+        local: 'oficina', tipo: 'garantia', relato: `Retorno: problema voltou após "${servico.descricao}"`, diagnostico: '',
+        desconto_pct: 0, forma_pagamento: r.cli.dados.forma_pagamento, aberta_em: aberta.toISOString(), travada: false, os_origem_id: r.osId,
+      })
+      await g('os_veiculos', { id: ovId, os_id: osId, veiculo_id: r.conjunto[0].id, km: r.conjunto[0].km })
+      await g('os_mecanicos', { id: uuid(), os_id: osId, funcionario_id: r.mec.id })
+      await g('os_itens', { id: uuid(), os_id: osId, ordem: 0, tipo: 'mao_obra', descricao: `${servico.descricao} (garantia)`, qtd: 1, preco: 0, custo: 0, servico_id: servico.servico_id, os_veiculo_id: ovId })
+      await g('os_status_hist', { id: uuid(), os_id: osId, de: null, para: 'execucao', motivo: 'Retorno em garantia', usuario_nome: dono.nome, data: aberta.toISOString() })
     }
   }
   await nuvem.contador.put({ chave: 'os', valor: numero })

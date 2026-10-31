@@ -16,6 +16,8 @@ export interface EstadoSync {
   sincronizando: boolean
   ultimoSync?: string
   ultimoErro?: string
+  /** Progresso do envio de fotos na sincronização atual. */
+  arquivos?: { total: number; enviados: number }
 }
 
 let estado: EstadoSync = { sincronizando: false }
@@ -30,12 +32,21 @@ export const assinarEstadoSync = (f: () => void) => {
   return () => { ouvintes.delete(f) }
 }
 
-let emAndamento: Promise<void> | null = null
+let emAndamento: { promessa: Promise<void>; usuario?: string } | null = null
 
-/** Envia pendências e baixa alterações. Chamadas simultâneas reutilizam a mesma execução. */
-export function sincronizar(opcoes: { forcar?: boolean } = {}) {
-  if (!emAndamento) emAndamento = executar(!!opcoes.forcar).finally(() => { emAndamento = null })
-  return emAndamento
+/**
+ * Envia pendências e baixa alterações. Chamadas simultâneas do mesmo usuário reutilizam a mesma execução;
+ * se o usuário mudou (troca de login), espera a anterior terminar e roda de novo para o novo usuário.
+ */
+export function sincronizar(opcoes: { forcar?: boolean } = {}): Promise<void> {
+  const usuario = getSessao()?.usuario_id
+  if (emAndamento) {
+    if (emAndamento.usuario === usuario) return emAndamento.promessa
+    return emAndamento.promessa.then(() => sincronizar(opcoes))
+  }
+  const atual = { usuario, promessa: executar(!!opcoes.forcar).finally(() => { if (emAndamento === atual) emAndamento = null }) }
+  emAndamento = atual
+  return atual.promessa
 }
 
 async function executar(forcar: boolean) {
@@ -44,6 +55,7 @@ async function executar(forcar: boolean) {
   definir({ sincronizando: true })
   try {
     await enviar(sessao, forcar)
+    await enviarArquivos(sessao)
     await receber(sessao)
     const agora = new Date().toISOString()
     await setLocal('ultimo_sync', agora)
@@ -54,6 +66,42 @@ async function executar(forcar: boolean) {
   } finally {
     definir({ sincronizando: false })
   }
+}
+
+/**
+ * Fila própria das fotos: envia os arquivos pendentes, um por vez, com progresso.
+ * Roda depois dos registros, para a foto nunca chegar antes da OS.
+ */
+async function enviarArquivos(sessao: Sessao) {
+  const pendentes = await db.arquivos.where('enviado').equals(0).toArray()
+  if (!pendentes.length) return
+  definir({ arquivos: { total: pendentes.length, enviados: 0 } })
+  try {
+    for (const [i, a] of pendentes.entries()) {
+      await transporte.enviarArquivo(a.id, a.blob, a.tipo, sessao)
+      await db.arquivos.update(a.id, { enviado: 1 })
+      definir({ arquivos: { total: pendentes.length, enviados: i + 1 } })
+    }
+  } finally {
+    definir({ arquivos: undefined })
+  }
+}
+
+/** Foto completa: do aparelho, ou baixada do servidor se houver internet. */
+export async function obterArquivo(id: string): Promise<Blob | null> {
+  const local = await db.arquivos.get(id)
+  if (local) return local.blob
+  if (!estaOnline()) return null
+  try {
+    return await transporte.baixarArquivo(id)
+  } catch {
+    return null
+  }
+}
+
+/** Libera o espaço das fotos já enviadas (as miniaturas continuam). Retorna quantas foram liberadas. */
+export async function liberarArquivosEnviados() {
+  return db.arquivos.where('enviado').equals(1).delete()
 }
 
 async function adiar(itens: OutboxItem[], motivo: string) {
@@ -137,6 +185,8 @@ async function enviar(sessao: Sessao, forcar: boolean) {
 async function receber(sessao: Sessao) {
   const desde = await getLocal<string | null>('ultimo_pull_servidor', null)
   const { registros, agora } = await transporte.receber(desde, sessao)
+  // Usuário trocou durante o download: descarta (o novo usuário baixa o que é dele).
+  if (getSessao()?.usuario_id !== sessao.usuario_id) return
   const pendentes = new Set((await db.outbox.toArray()).map((o) => o.registro_id))
   const porTabela = new Map<TabelaSync, unknown[]>()
   for (const { tabela, registro } of registros) {
