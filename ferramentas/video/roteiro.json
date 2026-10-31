@@ -1,0 +1,12 @@
+[
+  { "id": "capa", "titulo": "Bruno Mecânica Diesel", "fala": "Esta é a Bruno Mecânica Diesel, com o seu novo sistema de gestão: ordens de serviço, clientes e financeiro, no celular e no computador, funcionando até sem internet." },
+  { "id": "perfis", "titulo": "Um acesso para cada pessoa", "fala": "Cada pessoa entra com o seu perfil. Dono, secretária e mecânicos: cada um vê somente o que precisa." },
+  { "id": "dono", "titulo": "Painel do dono", "fala": "O dono acompanha tudo em um painel: faturamento do mês, margem de lucro, contas a receber, atrasos e a projeção de faturamento." },
+  { "id": "orcamento", "titulo": "Orçamento em poucos toques", "fala": "A secretária monta o orçamento rapidinho. Escolhe a transportadora, marca o cavalo e a carreta, e o preço já vem da tabela do cliente." },
+  { "id": "aprovacao", "titulo": "Aprovação registrada", "fala": "Ela registra quem aprovou e o número do pedido, e já transforma o orçamento em ordem de serviço." },
+  { "id": "mecanico", "titulo": "O mecânico no celular", "fala": "No celular, o mecânico vê somente as suas ordens, sem valores, e marca as horas trabalhadas com um toque." },
+  { "id": "finalizar", "titulo": "Assinatura na tela", "fala": "Ao terminar, ele colhe a assinatura na própria tela. A ordem fica finalizada e protegida contra alterações." },
+  { "id": "offline", "titulo": "Funciona sem internet", "fala": "No pátio ou na estrada, sem sinal? Sem problema. Tudo fica salvo no celular e sincroniza sozinho quando a internet volta." },
+  { "id": "financeiro", "titulo": "Financeiro", "fala": "No financeiro, o dono vê as contas a receber, os clientes que mais faturam e os serviços mais executados." },
+  { "id": "fim", "titulo": "Próximos passos", "fala": "Próximos passos: PDF com PIX, envio pelo WhatsApp, histórico por placa e financeiro completo. Bruno Mecânica Diesel: tecnologia a serviço da oficina." }
+]

@@ -6,3 +6,8 @@ dev-dist
 qrcode-celular.png
 test-results
 playwright-report
+apresentacao/
+ferramentas/video/audio/
+ferramentas/video/bruto/
+ferramentas/video/duracoes.json
+ferramentas/video/linha-do-tempo.json
