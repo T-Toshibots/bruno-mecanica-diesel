@@ -37,3 +37,23 @@ Registro das decisões tomadas durante o desenvolvimento (regra 2 do prompt).
 22. **Leitura de Excel** com `read-excel-file`, carregada só na tela de importação para não pesar o app.
 23. **CEP (ViaCEP) e CNPJ (BrasilAPI)** só com internet; offline aparece "preencha manualmente". O CEP busca sozinho ao sair do campo, se o endereço estiver vazio.
 24. **Dados de demonstração versionados** (`VERSAO_SEED`): aparelhos com a demo antiga recriam a demonstração na abertura, só se não houver pendências. Ao recriar, a sessão é encerrada (os usuários ganham novos IDs).
+
+## Decididas na Fase 4
+
+25. **Vários veículos por OS** (`os_veiculos`), com km e horímetro de cada um. Cada item pode apontar para um veículo (`os_veiculo_id`); sem vínculo, vale para a OS toda. No detalhe, os itens aparecem agrupados por veículo.
+26. **Peças:** código/referência, origem (oficina ou cliente; peça do cliente fica com preço e custo zero) e fornecedor. **Terceiros** (retífica, torno, solda) são itens do tipo "terceiro" com custo e preço. A conta a pagar automática da peça comprada fica para a **Fase 7 (Financeiro)**.
+27. **Horas trabalhadas** (`os_apontamentos`): cada mecânico inicia e pausa as próprias horas. Iniciar numa OS aprovada já a coloca "Em execução". Ao finalizar, as horas em andamento são encerradas (o mecânico só encerra as dele).
+28. **Finalização pede a assinatura do mecânico** (obrigatória) e a do cliente/motorista (opcional, se ele não estiver presente), com nome, documento, data/hora e registro de assinatura feita offline. As assinaturas são gravadas **antes** da mudança de status, porque a OS finalizada fica travada.
+29. **Assinaturas continuam como imagem dentro do registro** (são pequenas, ~10–20 KB). Só as fotos vão para o Storage.
+30. **Fotos:** arquivo completo (1600px, JPEG 70%) numa fila própria (`arquivos`), enviada depois dos registros, com barra de progresso. O registro leva uma miniatura de ~240px que aparece mesmo offline. A foto completa vem do aparelho ou é baixada com internet. O botão "Liberar espaço" (Sincronização) apaga do aparelho as fotos já enviadas. Fotos têm momento (antes/durante/depois) e legenda. O vínculo da foto a um item específico ficou no modelo (`item_id`), sem tela ainda.
+31. **Aprovação** (`os_aprovacoes`): quem aprovou, como, data/hora e nº do pedido (obrigatório se o cliente exigir). A opção "Já iniciar a execução" converte o orçamento em OS com um toque.
+32. **Garantia:** o prazo vem do catálogo para cada item de mão de obra. A OS de **retorno em garantia** fica vinculada à original (`os_origem_id`), com os itens de garantia copiados com preço zero, e já nasce "Aprovada". Ao lançar um serviço já feito no mesmo veículo dentro do prazo, aparece o alerta "Possível retorno em garantia".
+33. **Duplicar OS** copia cliente, veículos, mecânicos e itens (sem fotos nem assinaturas) para um novo orçamento.
+34. **Rascunho automático** do formulário da OS no aparelho, só depois que algo é alterado. Ao reabrir, aparece "Rascunho recuperado" com a opção de descartar.
+35. **GPS opcional** no atendimento fora da oficina (pede permissão), com link para o mapa.
+36. **Correções feitas nesta fase:**
+    - textos longos alargavam a página no celular e escondiam o botão Salvar (agora há regra global para itens de grade e proteção contra rolagem lateral);
+    - o botão Salvar da OS virou barra fixa acima da navegação inferior;
+    - uma sincronização em andamento do usuário anterior impedia o novo usuário de baixar os dados dele;
+    - ao trocar de usuário, o app volta ao Painel.
+37. **Primeiro acesso precisa de internet** até o app ficar guardado no aparelho. A tela Sincronização mostra "App guardado neste aparelho" quando já dá para usar offline.

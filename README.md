@@ -12,7 +12,8 @@ Sistema de ordens de serviço, clientes e financeiro para mecânica diesel pesad
 | 1. Planejamento | ✅ aprovado |
 | 2. Fundação (perfis, banco local, sincronização, testes) | ✅ em **modo demonstração** (sem Supabase) |
 | 3. Cadastros (preços por cliente, contatos, fornecedores, equipe, catálogo, importação) | ✅ |
-| 4 a 9 | a fazer |
+| 4. Orçamentos e OS (vários veículos, horas, fotos com fila própria, assinaturas, garantia, duplicar, rascunho) | ✅ |
+| 5 a 9 | a fazer |
 
 ## Requisitos
 
@@ -33,7 +34,7 @@ Abra o endereço mostrado no terminal e escolha um perfil para entrar (Dono, Sec
 
 ```bash
 npm test            # unitários: cálculos, preços por cliente, importação, permissões, sincronização, conflitos, numeração offline
-npm run test:e2e    # ponta a ponta no Chrome: chamado offline, permissões, importação de planilha, tabela de preços
+npm run test:e2e    # ponta a ponta no Chrome: chamado offline, permissões, importação, tabela de preços, fluxo completo da OS, rascunho, garantia
 ```
 
 ## Publicar
@@ -62,6 +63,8 @@ Cadastros → **Importar** → **Baixar modelo**. Preencha no Excel (uma linha p
 Edite apenas `src/config/tema.ts` (nome, cores, dados da oficina) e as imagens em `public/` (`logo.png`, `icon-*.png`).
 
 ## Como testar o modo offline
+
+> Na primeira vez, abra o app com internet e espere a tela **Sincronização** mostrar "App guardado neste aparelho".
 
 **No computador (demonstração):** tela **Sincronização** → **Simular sem internet**. Crie uma OS, veja o contador de pendências, desligue a simulação e veja a sincronização acontecer.
 
