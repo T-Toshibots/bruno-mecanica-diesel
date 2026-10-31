@@ -11,3 +11,8 @@ ferramentas/video/audio/
 ferramentas/video/bruto/
 ferramentas/video/duracoes.json
 ferramentas/video/linha-do-tempo.json
+ferramentas/video-premium/falas/
+ferramentas/video-premium/quadros/
+ferramentas/video-premium/*.wav
+ferramentas/video-premium/linha.json
+ferramentas/video-premium/quadros.txt
