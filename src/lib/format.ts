@@ -1,5 +1,6 @@
 import type {
-  CondicaoFaturamento, FormaPagamento, LocalOS, Modalidade, OrdemServico, Papel, StatusOS, TipoItem, TipoOS, TipoVeiculo,
+  CondicaoFaturamento, FormaPagamento, LocalOS, Modalidade, OrdemServico, Papel, PapelContato, StatusOS, TipoFornecedor, TipoItem,
+  TipoOS, TipoVeiculo,
 } from '../domain/tipos'
 
 const moedaFmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -95,3 +96,15 @@ export const TIPOS_VEICULO: Record<TipoVeiculo, string> = {
 export const TIPOS_ITEM: Record<TipoItem, string> = {
   mao_obra: 'Mão de obra', peca: 'Peça', terceiro: 'Terceiro', deslocamento: 'Deslocamento', socorro: 'Socorro / fora de horário',
 }
+
+export const CATEGORIAS_SERVICO = [
+  'Motor', 'Freio', 'Suspensão', 'Elétrica', 'Câmbio', 'Diferencial', 'Embreagem', 'Arrefecimento', 'Injeção', 'Revisão', 'Outros',
+]
+
+export const TIPOS_FORNECEDOR: Record<TipoFornecedor, string> = {
+  autopecas: 'Autopeças', retifica: 'Retífica', torno: 'Tornearia', solda: 'Solda', eletrica: 'Auto elétrica', pneus: 'Pneus', outro: 'Outro',
+}
+
+export const PAPEIS_CONTATO: Record<PapelContato, string> = { frota: 'Responsável de frota', financeiro: 'Financeiro', outro: 'Outro' }
+
+export const minutosParaHoras = (min?: number) => (min ? `${Math.floor(min / 60)}h${min % 60 ? String(min % 60).padStart(2, '0') : ''}` : '—')

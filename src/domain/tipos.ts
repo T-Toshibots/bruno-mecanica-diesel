@@ -34,6 +34,9 @@ export interface OficinaConfig extends Base {
   cidade: string
   pix: string
   valor_hora: number
+  /** Deslocamento padrão quando o cliente não tem tabela própria. */
+  deslocamento_fixo: number
+  valor_km: number
   garantia_texto: string
 }
 
@@ -195,4 +198,48 @@ export interface Auditoria extends Base {
   usuario_nome: string
   antes?: unknown
   depois?: unknown
+}
+
+export type PapelContato = 'frota' | 'financeiro' | 'outro'
+
+export interface ClienteContato extends Base {
+  cliente_id: string
+  nome: string
+  papel: PapelContato
+  telefone?: string
+  email?: string
+}
+
+/**
+ * Tabela de preços por cliente. Linha sem `servico_id` = valores gerais do cliente
+ * (hora técnica e deslocamento); com `servico_id` = preço daquele serviço para o cliente.
+ */
+export interface ClientePreco extends Base {
+  cliente_id: string
+  servico_id?: string | null
+  valor?: number
+  valor_hora?: number
+  deslocamento_fixo?: number
+  valor_km?: number
+}
+
+export interface VeiculoClienteHist extends Base {
+  veiculo_id: string
+  cliente_id: string
+  de: string
+  ate?: string | null
+}
+
+export type TipoFornecedor = 'autopecas' | 'retifica' | 'torno' | 'solda' | 'eletrica' | 'pneus' | 'outro'
+
+export interface Fornecedor extends Base {
+  nome: string
+  tipo: TipoFornecedor
+  documento?: string
+  contato?: string
+  telefone?: string
+  email?: string
+  cidade?: string
+  observacoes?: string
+  ativo: boolean
 }

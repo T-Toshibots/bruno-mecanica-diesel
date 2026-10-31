@@ -27,6 +27,8 @@ export const tema = {
     cidade: 'São Paulo - SP',
     pix: '00.000.000/0001-00',
     valor_hora: 150,
+    deslocamento_fixo: 200,
+    valor_km: 3.5,
     garantia_texto: 'Serviços com garantia de 90 dias contados da data de finalização, exceto peças fornecidas pelo cliente.',
   },
 }
