@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bruno Mecânica Diesel — Manutenção pesada de caminhões</title>
+<meta name="description" content="Mecânica diesel especializada em caminhões, carretas e frotas de transportadoras. Motor, injeção, câmbio, freios, rastreadores e socorro 24h na estrada.">
+<meta name="theme-color" content="#0F0F0F">
+<meta property="og:title" content="Bruno Mecânica Diesel — Sua frota de volta na estrada">
+<meta property="og:description" content="Manutenção pesada de caminhões e carretas, contratos para transportadoras e socorro 24h.">
+<meta property="og:image" content="../logo.png">
+<link rel="icon" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Saira+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --laranja: #F7931E;
+    --laranja-claro: #FFB04D;
+    --ferrugem: #C1440E;
+    --fundo: #0B0B0B;
+    --painel: #141414;
+    --card: #1B1B1B;
+    --borda: #2A2A2A;
+    --texto: #D9D9D9;
+    --cinza: #8F8F8F;
+    --branco: #FFFFFF;
+    --verde: #25D366;
+    --raio: 14px;
+    --max: 1200px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+  body {
+    margin: 0; background: var(--fundo); color: var(--texto);
+    font: 400 16px/1.6 Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  h1, h2, h3, .titulo { font-family: 'Saira Condensed', Impact, sans-serif; text-transform: uppercase; color: var(--branco); margin: 0; line-height: .95; letter-spacing: .5px; }
+  .container { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 20px; }
+  .laranja { color: var(--laranja); }
+  .sobretitulo {
+    display: inline-flex; align-items: center; gap: 10px; font: 700 13px/1 Inter, sans-serif; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--laranja); margin-bottom: 16px;
+  }
+  .sobretitulo::before { content: ''; width: 28px; height: 3px; background: var(--laranja); }
+  section { position: relative; padding: 110px 0; }
+  .secao-titulo { font-size: clamp(38px, 6vw, 64px); font-style: italic; font-weight: 900; }
+  .secao-sub { color: var(--cinza); font-size: 18px; max-width: 620px; margin: 18px 0 0; }
+
+  /* Botões */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; padding: 0 26px;
+    font: 800 17px/1 'Saira Condensed', sans-serif; letter-spacing: 1px; text-transform: uppercase; border-radius: 10px;
+    border: 0; cursor: pointer; transition: transform .2s, box-shadow .2s, background .2s; white-space: nowrap;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .btn-laranja { background: var(--laranja); color: #111; box-shadow: 0 10px 30px -10px rgba(247,147,30,.7); }
+  .btn-laranja:hover { background: var(--laranja-claro); transform: translateY(-2px); box-shadow: 0 16px 40px -12px rgba(247,147,30,.8); }
+  .btn-contorno { background: rgba(255,255,255,.04); color: var(--branco); border: 1.5px solid rgba(255,255,255,.2); }
+  .btn-contorno:hover { border-color: var(--laranja); color: var(--laranja); }
+  .btn-whats { background: var(--verde); color: #08240f; }
+  .btn-whats:hover { filter: brightness(1.08); transform: translateY(-2px); }
+
+  /* Faixa de alerta (listras) */
+  .listras { height: 10px; background: repeating-linear-gradient(-45deg, var(--laranja) 0 18px, #111 18px 36px); }
+
+  /* Topo */
+  .topo-aviso { background: var(--laranja); color: #111; font: 700 13px/1.3 Inter, sans-serif; text-align: center; padding: 9px 16px; }
+  .topo-aviso a { text-decoration: underline; }
+  header {
+    position: sticky; top: 0; z-index: 50; background: rgba(11,11,11,.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,.06); transition: background .3s;
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 76px; gap: 20px; }
+  .marca { display: flex; align-items: center; gap: 12px; }
+  .marca img { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2px solid var(--laranja); }
+  .marca strong { display: block; font: 900 italic 26px/0.9 'Saira Condensed', sans-serif; color: var(--branco); text-transform: uppercase; }
+  .marca span { display: block; font: 700 11px/1.2 Inter, sans-serif; letter-spacing: 2.5px; color: var(--laranja); text-transform: uppercase; }
+  .menu { display: flex; gap: 30px; font-weight: 600; font-size: 15px; }
+  .menu a { color: var(--texto); position: relative; padding: 6px 0; }
+  .menu a::after { content: ''; position: absolute; left: 0; bottom: 0; width: 0; height: 2px; background: var(--laranja); transition: width .25s; }
+  .menu a:hover { color: var(--branco); }
+  .menu a:hover::after { width: 100%; }
+  .nav .btn { min-height: 46px; padding: 0 20px; font-size: 16px; }
+  .hamburguer { display: none; background: none; border: 0; color: var(--branco); width: 46px; height: 46px; cursor: pointer; }
+  .hamburguer svg { width: 28px; height: 28px; }
+  .menu-movel { display: none; }
+
+  /* Hero */
+  .hero { padding: 70px 0 90px; overflow: hidden; isolation: isolate; }
+  .hero::before {
+    content: ''; position: absolute; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse 60% 55% at 78% 40%, rgba(247,147,30,.22), transparent 70%),
+      radial-gradient(ellipse 50% 60% at 10% 100%, rgba(193,68,14,.18), transparent 70%),
+      linear-gradient(180deg, #0B0B0B, #101010);
+  }
+  .hero::after {
+    content: ''; position: absolute; inset: 0; z-index: -1; opacity: .35;
+    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 56px 56px; mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  }
+  .hero-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 50px; align-items: center; }
+  .selo {
+    display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px 8px 8px; border-radius: 999px;
+    background: rgba(247,147,30,.1); border: 1px solid rgba(247,147,30,.35); font-size: 14px; font-weight: 600; color: var(--branco); margin-bottom: 26px;
+  }
+  .selo b { background: var(--laranja); color: #111; border-radius: 999px; padding: 3px 10px; font-size: 12px; letter-spacing: 1px; }
+  .pulso { width: 9px; height: 9px; border-radius: 50%; background: var(--verde); box-shadow: 0 0 0 0 rgba(37,211,102,.7); animation: pulso 2s infinite; }
+  @keyframes pulso { 70% { box-shadow: 0 0 0 10px rgba(37,211,102,0); } 100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); } }
+  .hero h1 { font-size: clamp(46px, 5.4vw, 76px); font-style: italic; font-weight: 900; }
+  .hero h1 .destaque { color: var(--laranja); display: block; text-shadow: 0 0 60px rgba(247,147,30,.35); }
+  .hero p.lead { font-size: 19px; color: #BDBDBD; max-width: 560px; margin: 26px 0 34px; }
+  .hero p.lead strong { color: var(--branco); }
+  .acoes { display: flex; flex-wrap: wrap; gap: 14px; }
+  .garantias { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 38px; color: var(--cinza); font-size: 14px; font-weight: 500; }
+  .garantias span { display: inline-flex; align-items: center; gap: 8px; }
+  .garantias svg { width: 18px; height: 18px; color: var(--laranja); }
+
+  .hero-visual { position: relative; }
+  .logo-moldura {
+    position: relative; border-radius: 24px; overflow: hidden; border: 1px solid rgba(247,147,30,.3);
+    box-shadow: 0 40px 100px -30px rgba(247,147,30,.45), 0 0 0 8px rgba(255,255,255,.02); transform: rotate(-1.5deg);
+    animation: flutua 7s ease-in-out infinite;
+  }
+  @keyframes flutua { 50% { transform: rotate(-1.5deg) translateY(-12px); } }
+  .logo-moldura::after { content: ''; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.12) 50%, transparent 60%); background-size: 250% 100%; animation: brilho 6s ease-in-out infinite; }
+  @keyframes brilho { 0%, 60% { background-position: 150% 0; } 100% { background-position: -50% 0; } }
+  .cartao-flutuante {
+    position: absolute; background: rgba(20,20,20,.92); backdrop-filter: blur(10px); border: 1px solid var(--borda);
+    border-radius: 14px; padding: 14px 16px; box-shadow: 0 20px 50px -20px #000; font-size: 13px; min-width: 210px;
+  }
+  .cartao-flutuante .rotulo { color: var(--cinza); font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+  .cartao-flutuante .valor { font: 800 26px/1.1 'Saira Condensed', sans-serif; color: var(--branco); }
+  .cf-1 { left: -34px; bottom: -34px; animation: flutua2 6s ease-in-out infinite; }
+  .cf-2 { right: -22px; top: -26px; animation: flutua2 7s ease-in-out infinite reverse; }
+  @keyframes flutua2 { 50% { transform: translateY(-10px); } }
+  .status { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--verde); font-size: 12px; }
+  .status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .barra { height: 6px; border-radius: 9px; background: #2a2a2a; margin-top: 8px; overflow: hidden; }
+  .barra i { display: block; height: 100%; width: 78%; background: linear-gradient(90deg, var(--ferrugem), var(--laranja)); border-radius: 9px; }
+
+  /* Marcas */
+  .marcas { background: var(--painel); border-block: 1px solid var(--borda); padding: 22px 0; overflow: hidden; }
+  .trilho { display: flex; gap: 70px; width: max-content; animation: rolar 32s linear infinite; }
+  .marcas:hover .trilho { animation-play-state: paused; }
+  .trilho span { font: 900 italic 30px/1 'Saira Condensed', sans-serif; text-transform: uppercase; color: #4a4a4a; letter-spacing: 1px; white-space: nowrap; transition: color .2s; }
+  .trilho span:hover { color: var(--laranja); }
+  @keyframes rolar { to { transform: translateX(-50%); } }
+
+  /* Números */
+  .numeros { padding: 80px 0; }
+  .numeros-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--borda); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
+  .numero { background: var(--fundo); padding: 38px 28px; }
+  .numero strong { display: block; font: 900 italic clamp(48px, 6vw, 72px)/1 'Saira Condensed', sans-serif; color: var(--laranja); }
+  .numero span { display: block; margin-top: 8px; color: var(--texto); font-weight: 600; }
+  .numero small { color: var(--cinza); font-size: 14px; }
+
+  /* Serviços */
+  .servicos { background: linear-gradient(180deg, var(--fundo), #0F0F0F); }
+  .cabecalho-secao { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 56px; }
+  .servicos-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .servico {
+    position: relative; padding: 28px 24px; background: var(--card); border: 1px solid var(--borda); border-radius: var(--raio);
+    overflow: hidden; transition: transform .3s, border-color .3s, background .3s;
+  }
+  .servico::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--laranja), transparent); transform: scaleX(0); transform-origin: left; transition: transform .4s; }
+  .servico:hover { transform: translateY(-6px); border-color: rgba(247,147,30,.45); background: #1f1f1f; }
+  .servico:hover::before { transform: scaleX(1); }
+  .icone { width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; background: rgba(247,147,30,.1); color: var(--laranja); margin-bottom: 20px; border: 1px solid rgba(247,147,30,.25); }
+  .icone svg { width: 28px; height: 28px; }
+  .servico h3 { font-size: 25px; font-weight: 800; margin-bottom: 10px; }
+  .servico p { margin: 0; color: var(--cinza); font-size: 15px; }
+  .servico.destaque { background: linear-gradient(145deg, #2a1806, var(--card) 60%); border-color: rgba(247,147,30,.4); }
+  .tag { position: absolute; top: 18px; right: 18px; font: 700 11px/1 Inter, sans-serif; letter-spacing: 1px; text-transform: uppercase; background: var(--laranja); color: #111; padding: 5px 9px; border-radius: 6px; }
+
+  /* Frotas */
+  .frotas { background: var(--painel); border-block: 1px solid var(--borda); overflow: hidden; }
+  .frotas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; align-items: center; }
+  .lista-check { list-style: none; padding: 0; margin: 34px 0 38px; display: grid; gap: 18px; }
+  .lista-check li { display: flex; gap: 16px; }
+  .lista-check .ck { flex-shrink: 0; width: 34px; height: 34px; border-radius: 9px; background: var(--laranja); color: #111; display: grid; place-items: center; }
+  .lista-check .ck svg { width: 19px; height: 19px; }
+  .lista-check strong { display: block; color: var(--branco); font-size: 17px; }
+  .lista-check span { color: var(--cinza); font-size: 15px; }
+
+  /* Celular com o sistema */
+  .telefone {
+    width: 320px; max-width: 100%; margin: 0 auto; border-radius: 40px; padding: 12px; background: #050505;
+    border: 1px solid #333; box-shadow: 0 50px 100px -30px rgba(247,147,30,.35), inset 0 0 0 2px #1a1a1a; position: relative;
+  }
+  .tela { border-radius: 30px; background: #111; overflow: hidden; padding: 18px 16px 20px; font-size: 13px; }
+  .tela-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; color: var(--cinza); font-size: 11px; font-weight: 600; }
+  .tela h4 { margin: 0 0 2px; font: 900 italic 30px/1 'Saira Condensed', sans-serif; color: var(--branco); }
+  .tela .mini { color: var(--cinza); font-size: 12px; margin-bottom: 14px; }
+  .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .kpi { background: #1c1c1c; border: 1px solid #2a2a2a; border-radius: 10px; padding: 10px; }
+  .kpi small { display: block; color: var(--cinza); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .kpi b { font: 800 22px/1.2 'Saira Condensed', sans-serif; color: var(--laranja); }
+  .linha-tempo { border-left: 2px solid #2a2a2a; margin-left: 5px; padding-left: 14px; display: grid; gap: 10px; }
+  .evento { position: relative; background: #1c1c1c; border: 1px solid #2a2a2a; border-radius: 10px; padding: 9px 10px; }
+  .evento::before { content: ''; position: absolute; left: -21px; top: 12px; width: 10px; height: 10px; border-radius: 50%; background: var(--laranja); box-shadow: 0 0 0 3px #111; }
+  .evento .l1 { display: flex; justify-content: space-between; color: var(--branco); font-weight: 600; font-size: 12px; }
+  .evento .l2 { color: var(--cinza); font-size: 11px; }
+  .chip { display: inline-block; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px; margin-right: 4px; }
+  .c-mo { background: rgba(247,147,30,.15); color: var(--laranja); }
+  .c-pc { background: rgba(56,189,248,.15); color: #7dd3fc; }
+  .c-dl { background: rgba(37,211,102,.15); color: #6ee7a0; }
+
+  /* Etapas */
+  .etapas { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; counter-reset: etapa; margin-top: 56px; }
+  .etapa { position: relative; padding: 30px 22px 26px; border-radius: var(--raio); background: var(--card); border: 1px solid var(--borda); }
+  .etapa::before {
+    counter-increment: etapa; content: '0' counter(etapa); display: block; font: 900 italic 54px/1 'Saira Condensed', sans-serif;
+    color: transparent; -webkit-text-stroke: 1.5px var(--laranja); margin-bottom: 14px;
+  }
+  .etapa:not(:last-child)::after { content: ''; position: absolute; top: 56px; right: -17px; width: 18px; height: 2px; background: var(--laranja); z-index: 1; }
+  .etapa h3 { font-size: 23px; font-weight: 800; margin-bottom: 8px; }
+  .etapa p { margin: 0; color: var(--cinza); font-size: 14.5px; }
+
+  /* Socorro 24h */
+  .socorro { padding: 0; }
+  .socorro-caixa {
+    position: relative; overflow: hidden; border-radius: 22px; padding: 64px 56px;
+    background: radial-gradient(ellipse at 85% 50%, rgba(255,255,255,.18), transparent 55%), linear-gradient(120deg, var(--ferrugem), var(--laranja));
+    display: grid; grid-template-columns: 1.3fr 1fr; gap: 30px; align-items: center; color: #111;
+  }
+  .socorro-caixa::before { content: '24H'; position: absolute; right: -10px; bottom: -60px; font: 900 italic 300px/1 'Saira Condensed', sans-serif; color: rgba(0,0,0,.09); pointer-events: none; }
+  .socorro-caixa h2 { color: #111; font-size: clamp(40px, 6vw, 70px); font-style: italic; font-weight: 900; }
+  .socorro-caixa p { font-size: 18px; font-weight: 500; margin: 16px 0 0; max-width: 560px; color: #2a1405; }
+  .socorro-acoes { display: grid; gap: 14px; justify-items: start; position: relative; }
+  .telefone-grande { font: 900 italic clamp(36px, 5vw, 54px)/1 'Saira Condensed', sans-serif; color: #111; }
+  .btn-preto { background: #111; color: var(--branco); }
+  .btn-preto:hover { background: #000; transform: translateY(-2px); }
+
+  /* Diferenciais / estrutura */
+  .diferenciais-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 56px; }
+  .diferencial { padding: 30px; border-radius: var(--raio); border: 1px solid var(--borda); background: linear-gradient(180deg, #161616, #121212); }
+  .diferencial .num { font: 900 italic 40px/1 'Saira Condensed', sans-serif; color: var(--laranja); }
+  .diferencial h3 { font-size: 24px; font-weight: 800; margin: 12px 0 8px; }
+  .diferencial p { margin: 0; color: var(--cinza); font-size: 15px; }
+
+  /* Depoimentos */
+  .depoimentos { background: var(--painel); border-block: 1px solid var(--borda); }
+  .depo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 56px; }
+  .depo { padding: 32px 28px; border-radius: var(--raio); background: var(--card); border: 1px solid var(--borda); display: flex; flex-direction: column; }
+  .estrelas { color: var(--laranja); letter-spacing: 3px; font-size: 18px; }
+  .depo blockquote { margin: 16px 0 26px; font-size: 16.5px; color: var(--texto); flex: 1; }
+  .depo blockquote::before { content: '“'; display: block; font: 900 64px/0.6 'Saira Condensed', sans-serif; color: var(--laranja); margin-bottom: 8px; }
+  .autor { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font: 900 20px/1 'Saira Condensed', sans-serif; color: #111; background: var(--laranja); }
+  .autor strong { display: block; color: var(--branco); }
+  .autor span { color: var(--cinza); font-size: 14px; }
+
+  /* FAQ */
+  .faq-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 60px; align-items: start; }
+  details { border-bottom: 1px solid var(--borda); }
+  summary {
+    list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 20px;
+    padding: 24px 0; font: 700 22px/1.2 'Saira Condensed', sans-serif; text-transform: uppercase; color: var(--branco);
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary .mais { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--borda); display: grid; place-items: center; color: var(--laranja); transition: transform .3s, background .3s; }
+  details[open] summary .mais { transform: rotate(45deg); background: var(--laranja); color: #111; border-color: var(--laranja); }
+  details p { margin: 0 0 24px; color: var(--cinza); max-width: 640px; }
+
+  /* Contato */
+  .contato { background: linear-gradient(180deg, #0F0F0F, #0B0B0B); }
+  .contato-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 50px; align-items: start; }
+  .info-contato { display: grid; gap: 16px; margin-top: 34px; }
+  .info { display: flex; gap: 16px; align-items: flex-start; padding: 20px; border-radius: var(--raio); background: var(--card); border: 1px solid var(--borda); }
+  .info .icone { width: 46px; height: 46px; margin: 0; flex-shrink: 0; }
+  .info .icone svg { width: 22px; height: 22px; }
+  .info strong { display: block; color: var(--branco); }
+  .info span { color: var(--cinza); font-size: 15px; }
+  form.orcamento { padding: 36px; border-radius: 20px; background: var(--card); border: 1px solid var(--borda); box-shadow: 0 30px 80px -40px rgba(247,147,30,.35); }
+  form.orcamento h3 { font-size: 34px; font-style: italic; font-weight: 900; }
+  form.orcamento > p { color: var(--cinza); margin: 8px 0 26px; }
+  .campos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .campo { display: grid; gap: 6px; }
+  .campo.inteiro { grid-column: 1 / -1; }
+  .campo label { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--cinza); }
+  .campo input, .campo select, .campo textarea {
+    width: 100%; min-height: 50px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--borda); background: #121212;
+    color: var(--branco); font: 500 16px Inter, sans-serif; outline: none; transition: border-color .2s, box-shadow .2s;
+  }
+  .campo textarea { min-height: 110px; resize: vertical; }
+  .campo input:focus, .campo select:focus, .campo textarea:focus { border-color: var(--laranja); box-shadow: 0 0 0 3px rgba(247,147,30,.18); }
+  form.orcamento .btn { width: 100%; margin-top: 20px; }
+  .nota { font-size: 13px; color: var(--cinza); text-align: center; margin: 14px 0 0; }
+
+  /* Rodapé */
+  footer { background: #070707; padding: 70px 0 30px; border-top: 1px solid var(--borda); }
+  .rodape-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; }
+  footer h4 { font: 800 18px/1 'Saira Condensed', sans-serif; text-transform: uppercase; color: var(--branco); margin: 0 0 18px; letter-spacing: 1px; }
+  footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; color: var(--cinza); font-size: 15px; }
+  footer ul a:hover { color: var(--laranja); }
+  .rodape-logo { width: 220px; border-radius: 12px; margin-bottom: 18px; }
+  .rodape-fim { margin-top: 50px; padding-top: 24px; border-top: 1px solid var(--borda); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; color: #5f5f5f; font-size: 13px; }
+  .rodape-fim a { color: var(--cinza); }
+  .rodape-fim a:hover { color: var(--laranja); }
+
+  /* WhatsApp flutuante */
+  .whats-flutuante {
+    position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 60; width: 62px; height: 62px; border-radius: 50%;
+    background: var(--verde); color: #fff; display: grid; place-items: center; box-shadow: 0 12px 30px -8px rgba(37,211,102,.7); animation: pulso-verde 2.4s infinite;
+  }
+  .whats-flutuante svg { width: 32px; height: 32px; }
+  @keyframes pulso-verde { 0% { box-shadow: 0 0 0 0 rgba(37,211,102,.55), 0 12px 30px -8px rgba(37,211,102,.7); } 70% { box-shadow: 0 0 0 16px rgba(37,211,102,0), 0 12px 30px -8px rgba(37,211,102,.7); } 100% { box-shadow: 0 0 0 0 rgba(37,211,102,0), 0 12px 30px -8px rgba(37,211,102,.7); } }
+
+  /* Animação de entrada */
+  .revelar { opacity: 0; transform: translateY(30px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .revelar.visivel { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .revelar { opacity: 1; transform: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* Responsivo */
+  @media (max-width: 1080px) {
+    .servicos-grid { grid-template-columns: repeat(2, 1fr); }
+    .etapas { grid-template-columns: repeat(2, 1fr); }
+    .etapa::after { display: none; }
+    .rodape-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 900px) {
+    section { padding: 80px 0; }
+    .menu, .nav .btn { display: none; }
+    .hamburguer { display: grid; place-items: center; }
+    .menu-movel.aberto { display: grid; gap: 4px; padding: 10px 20px 22px; border-top: 1px solid var(--borda); }
+    .menu-movel a { padding: 14px 4px; font-weight: 600; font-size: 17px; border-bottom: 1px solid rgba(255,255,255,.05); }
+    .menu-movel .btn { margin-top: 12px; }
+    .hero { padding: 40px 0 70px; }
+    .hero-grid, .frotas-grid, .faq-grid, .contato-grid { grid-template-columns: 1fr; gap: 50px; }
+    .hero-visual { max-width: 520px; margin: 0 auto; padding: 0 12px; }
+    .cf-1 { left: -6px; bottom: -26px; }
+    .cf-2 { right: -6px; top: -20px; }
+    .numeros-grid { grid-template-columns: 1fr 1fr; }
+    .diferenciais-grid, .depo-grid { grid-template-columns: 1fr; }
+    .socorro-caixa { grid-template-columns: 1fr; padding: 44px 28px; }
+    .socorro-caixa::before { font-size: 200px; bottom: -40px; }
+  }
+  @media (max-width: 560px) {
+    .container { padding: 0 16px; }
+    .marca strong { font-size: 22px; }
+    .marca span { font-size: 9.5px; letter-spacing: 2px; }
+    .marca img { width: 46px; height: 46px; }
+    .acoes .btn { width: 100%; }
+    .servicos-grid, .etapas { grid-template-columns: 1fr; }
+    .numero { padding: 26px 18px; }
+    .campos { grid-template-columns: 1fr; }
+    form.orcamento { padding: 26px 20px; }
+    .rodape-grid { grid-template-columns: 1fr; }
+    .cartao-flutuante { min-width: 0; padding: 10px 12px; }
+    .cartao-flutuante .valor { font-size: 21px; }
+    .trilho span { font-size: 24px; }
+    .topo-aviso { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Ícones (SVG reutilizáveis) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-whats" viewBox="0 0 24 24"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35zM12.05 21.5h-.01a9.4 9.4 0 0 1-4.8-1.32l-.34-.2-3.57.94.95-3.48-.22-.36a9.43 9.43 0 0 1-1.44-5.02c0-5.2 4.24-9.44 9.45-9.44 2.52 0 4.89.99 6.67 2.77a9.37 9.37 0 0 1 2.76 6.68c0 5.21-4.24 9.43-9.45 9.43zm8.04-17.47A11.3 11.3 0 0 0 12.05.7C5.78.7.68 5.8.68 12.06c0 2 .52 3.96 1.52 5.68L.58 23.7l6.1-1.6a11.35 11.35 0 0 0 5.37 1.37h.01c6.26 0 11.36-5.1 11.37-11.37 0-3.04-1.18-5.89-3.34-8.04z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-escudo" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-relogio" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></g></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></g></symbol>
+    <symbol id="i-fone" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+    <symbol id="i-email" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></g></symbol>
+    <symbol id="i-seta" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-motor" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h8l2 2h2v3h2v-2h1v6h-1v-2h-2v3h-3l-2 2H8l-2-2H4v-3H2v-5h2V8h3z"/><path d="M9 5h4M11 5v3"/></g></symbol>
+    <symbol id="i-injecao" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M9 6h6l-1 8h-4L9 6zM10 14l1 6h2l1-6"/><path d="M7 21l2-1M17 21l-2-1M12 22v-2"/></g></symbol>
+    <symbol id="i-cambio" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><path d="M5 7v12M12 7v12M19 7v5H5"/></g></symbol>
+    <symbol id="i-freio" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M5.5 5.5A9 9 0 0 0 3 12M18.5 5.5A9 9 0 0 1 21 12"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></g></symbol>
+    <symbol id="i-suspensao" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3M12 19v3M8 5h8M8 19h8"/><path d="M9 7l6 2-6 2 6 2-6 2 6 2"/></g></symbol>
+    <symbol id="i-eletrica" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></symbol>
+    <symbol id="i-radar" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.24a6 6 0 0 1 0-8.49M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></g></symbol>
+    <symbol id="i-turbo" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 4a4 4 0 0 1 0 8M20 12a4 4 0 0 1-8 0M12 20a4 4 0 0 1 0-8M4 12a4 4 0 0 1 8 0"/></g></symbol>
+    <symbol id="i-carreta" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6h14v9H1zM15 9h4l3 3v3h-7"/><circle cx="5" cy="17.5" r="1.8"/><circle cx="18" cy="17.5" r="1.8"/></g></symbol>
+    <symbol id="i-prancheta" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 2h6v4H9zM9 12l2 2 4-4M9 18h6"/></g></symbol>
+    <symbol id="i-guincho" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17V9h7l3 4h5l3 2v2"/><path d="M10 9V5l7 6"/><circle cx="7" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></g></symbol>
+    <symbol id="i-chave" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+  </defs>
+</svg>
+
+<div class="topo-aviso">🚨 Caminhão parado na estrada? <a href="#socorro">Socorro mecânico 24 horas</a> — chame agora no WhatsApp</div>
+
+<header id="topo">
+  <div class="container nav">
+    <a href="#inicio" class="marca" aria-label="Bruno Mecânica Diesel — início">
+      <img src="../icon-192.png" alt="">
+      <div><strong>Bruno</strong><span>Mecânica Diesel</span></div>
+    </a>
+    <nav class="menu" aria-label="Menu principal">
+      <a href="#servicos">Serviços</a>
+      <a href="#frotas">Transportadoras</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#socorro">Socorro 24h</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <a class="btn btn-laranja" href="#contato">Pedir orçamento</a>
+    <button class="hamburguer" aria-label="Abrir menu" aria-expanded="false" id="botaoMenu">
+      <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+  <nav class="menu-movel" id="menuMovel" aria-label="Menu">
+    <a href="#servicos">Serviços</a>
+    <a href="#frotas">Transportadoras</a>
+    <a href="#como-funciona">Como funciona</a>
+    <a href="#socorro">Socorro 24h</a>
+    <a href="#contato">Contato</a>
+    <a class="btn btn-laranja" href="#contato">Pedir orçamento</a>
+  </nav>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <div class="container hero-grid">
+      <div>
+        <div class="selo revelar"><b>DIESEL PESADO</b> <span class="pulso"></span> Atendendo agora</div>
+        <h1 class="revelar">Caminhão parado é prejuízo.<span class="destaque">A gente coloca de volta na estrada.</span></h1>
+        <p class="lead revelar">Manutenção pesada de <strong>caminhões, carretas e frotas de transportadoras</strong>. Motor, injeção eletrônica, câmbio, freios a ar, rastreadores e <strong>socorro 24h</strong>, com orçamento aprovado pelo WhatsApp e garantia por escrito.</p>
+        <div class="acoes revelar">
+          <a class="btn btn-laranja js-whats" data-msg="Olá! Vim pelo site e quero um orçamento para meu caminhão." href="#"><svg><use href="#i-whats"/></svg> Orçamento pelo WhatsApp</a>
+          <a class="btn btn-contorno" href="#servicos">Ver serviços <svg><use href="#i-seta"/></svg></a>
+        </div>
+        <div class="garantias revelar">
+          <span><svg><use href="#i-escudo"/></svg> Garantia de 90 dias</span>
+          <span><svg><use href="#i-relogio"/></svg> Socorro 24h na estrada</span>
+          <span><svg><use href="#i-prancheta"/></svg> OS digital com fotos</span>
+        </div>
+      </div>
+      <div class="hero-visual revelar">
+        <div class="logo-moldura"><img src="../logo.png" alt="Bruno Mecânica Diesel — Manutenção pesada de caminhões" width="900" height="660"></div>
+        <div class="cartao-flutuante cf-2">
+          <div class="rotulo">OS 00128 · Volvo FH 540</div>
+          <div class="status">Em execução</div>
+          <div class="barra"><i></i></div>
+        </div>
+        <div class="cartao-flutuante cf-1">
+          <div class="rotulo">Tempo médio de reparo</div>
+          <div class="valor">48 horas</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="listras" aria-hidden="true"></div>
+
+  <!-- MARCAS -->
+  <div class="marcas" aria-label="Marcas atendidas">
+    <div class="trilho">
+      <span>Volvo</span><span>Scania</span><span>Mercedes-Benz</span><span>DAF</span><span>Volkswagen</span><span>Iveco</span><span>Ford Cargo</span><span>Randon</span><span>Librelato</span><span>Facchini</span>
+      <span aria-hidden="true">Volvo</span><span aria-hidden="true">Scania</span><span aria-hidden="true">Mercedes-Benz</span><span aria-hidden="true">DAF</span><span aria-hidden="true">Volkswagen</span><span aria-hidden="true">Iveco</span><span aria-hidden="true">Ford Cargo</span><span aria-hidden="true">Randon</span><span aria-hidden="true">Librelato</span><span aria-hidden="true">Facchini</span>
+    </div>
+  </div>
+
+  <!-- NÚMEROS -->
+  <section class="numeros">
+    <div class="container">
+      <div class="numeros-grid revelar">
+        <div class="numero"><strong data-contar="15">0</strong><span>anos de estrada</span><small>experiência em diesel pesado</small></div>
+        <div class="numero"><strong data-contar="3500" data-mais>0</strong><span>caminhões atendidos</span><small>cavalos, trucks e carretas</small></div>
+        <div class="numero"><strong data-contar="40" data-mais>0</strong><span>transportadoras</span><small>com contrato de manutenção</small></div>
+        <div class="numero"><strong data-contar="24" data-sufixo="h">0</strong><span>socorro na estrada</span><small>todos os dias da semana</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVIÇOS -->
+  <section class="servicos" id="servicos">
+    <div class="container">
+      <div class="cabecalho-secao">
+        <div>
+          <div class="sobretitulo">O que fazemos</div>
+          <h2 class="secao-titulo revelar">Manutenção pesada<br><span class="laranja">de ponta a ponta</span></h2>
+        </div>
+        <p class="secao-sub revelar">Da revisão preventiva à retífica completa. Equipe especializada em diesel, ferramental para pesados e diagnóstico eletrônico de todas as marcas.</p>
+      </div>
+      <div class="servicos-grid">
+        <article class="servico destaque revelar"><span class="tag">Mais pedido</span><div class="icone"><svg><use href="#i-motor"/></svg></div><h3>Motor e retífica</h3><p>Diagnóstico de perda de força, vazamentos, superaquecimento e retífica completa com garantia.</p></article>
+        <article class="servico revelar"><div class="icone"><svg><use href="#i-injecao"/></svg></div><h3>Injeção eletrônica</h3><p>Regulagem e teste de bicos, bomba e unidade injetora. Scanner para todas as marcas.</p></article>
+        <article class="servico revelar"><div class="icone"><svg><use href="#i-cambio"/></svg></div><h3>Câmbio e embreagem</h3><p>Caixas manuais e automatizadas (I-Shift, Opticruise, PowerShift). Troca de kit de embreagem.</p></article>
+        <article class="servico revelar"><div class="icone"><svg><use href="#i-freio"/></svg></div><h3>Freios a ar e ABS</h3><p>Lonas, tambores, cuícas, válvulas e sistema ABS/EBS. Regulagem com segurança.</p></article>
+        <article class="servico revelar"><div class="icone"><svg><use href="#i-suspensao"/></svg></div><h3>Suspensão e eixos</h3><p>Feixes de mola, bolsas de ar, amortecedores, diferencial e alinhamento de eixos.</p></article>
+        <article class="servico revelar"><div class="icone"><svg><use href="#i-eletrica"/></svg></div><h3>Elétrica e diagnóstico</h3><p>Pane elétrica, alternador, motor de partida, chicotes e leitura de falhas no painel.</p></article>
+        <article class="servico revelar"><div class="icone"><svg><use href="#i-radar"/></svg></div><h3>Rastreadores e telemetria</h3><p>Instalação e manutenção de rastreadores, bloqueadores e sensores de telemetria da frota.</p></article>
+        <article class="servico revelar"><div class="icone"><svg><use href="#i-turbo"/></svg></div><h3>Turbina e arrefecimento</h3><p>Troca de turbina, radiador, bomba d'água e limpeza completa do sistema de arrefecimento.</p></article>
+        <article class="servico revelar"><div class="icone"><svg><use href="#i-carreta"/></svg></div><h3>Carretas e implementos</h3><p>Graneleiras, bitrens e rodotrens: freios, rodagem, suspensão e parte elétrica.</p></article>
+        <article class="servico revelar"><div class="icone"><svg><use href="#i-prancheta"/></svg></div><h3>Revisão preventiva</h3><p>Plano por quilometragem para evitar quebra na estrada. Óleo, filtros e checklist completo.</p></article>
+        <article class="servico revelar"><div class="icone"><svg><use href="#i-guincho"/></svg></div><h3>Socorro na estrada</h3><p>Equipe móvel para atendimento na rodovia e no pátio da transportadora, 24 horas.</p></article>
+        <article class="servico revelar"><div class="icone"><svg><use href="#i-chave"/></svg></div><h3>Serviços sob medida</h3><p>Torno, solda e serviços com parceiros especializados, tudo em uma única OS para você.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRANSPORTADORAS -->
+  <section class="frotas" id="frotas">
+    <div class="container frotas-grid">
+      <div>
+        <div class="sobretitulo">Para transportadoras</div>
+        <h2 class="secao-titulo revelar">Sua frota inteira<br><span class="laranja">na palma da mão</span></h2>
+        <p class="secao-sub revelar">Trabalhamos com sistema próprio de gestão. Cada caminhão tem seu histórico completo: o que foi feito, quando, quanto custou e quem fez.</p>
+        <ul class="lista-check">
+          <li class="revelar"><div class="ck"><svg><use href="#i-check"/></svg></div><div><strong>Contrato mensal de manutenção</strong><span>Preço fixo por tabela, prioridade no atendimento e plano preventivo para cada placa.</span></div></li>
+          <li class="revelar"><div class="ck"><svg><use href="#i-check"/></svg></div><div><strong>Faturamento mensal</strong><span>Todas as OS do mês em uma cobrança só, com número de pedido e nota fiscal.</span></div></li>
+          <li class="revelar"><div class="ck"><svg><use href="#i-check"/></svg></div><div><strong>Histórico por placa</strong><span>Mão de obra, peças e deslocamento separados. Relatórios para o seu gestor de frota.</span></div></li>
+          <li class="revelar"><div class="ck"><svg><use href="#i-check"/></svg></div><div><strong>Fotos e assinatura digital</strong><span>Antes, durante e depois do serviço. Nada de discussão sobre o que foi feito.</span></div></li>
+        </ul>
+        <a class="btn btn-laranja js-whats revelar" data-msg="Olá! Sou de uma transportadora e quero conhecer o contrato de manutenção para frotas." href="#"><svg><use href="#i-whats"/></svg> Quero um contrato para minha frota</a>
+      </div>
+      <div class="revelar">
+        <div class="telefone" aria-label="Exemplo do histórico de um caminhão no sistema">
+          <div class="tela">
+            <div class="tela-topo"><span>9:41</span><span class="status">Online</span></div>
+            <h4>FRT-2A45</h4>
+            <div class="mini">Volvo FH 540 · frota 101 · 612.300 km</div>
+            <div class="kpis">
+              <div class="kpi"><small>Total no ano</small><b>R$ 18.420</b></div>
+              <div class="kpi"><small>Passagens</small><b>7</b></div>
+            </div>
+            <div class="linha-tempo">
+              <div class="evento"><div class="l1"><span>12/11 · Preventiva</span><span>R$ 1.640</span></div><div class="l2"><span class="chip c-mo">Mão de obra</span><span class="chip c-pc">Peças</span> Troca de óleo e filtros</div></div>
+              <div class="evento"><div class="l1"><span>28/09 · Socorro</span><span>R$ 2.310</span></div><div class="l2"><span class="chip c-dl">Deslocamento</span><span class="chip c-mo">Mão de obra</span> Pane elétrica na BR-381</div></div>
+              <div class="evento"><div class="l1"><span>02/08 · Corretiva</span><span>R$ 4.980</span></div><div class="l2"><span class="chip c-mo">Mão de obra</span><span class="chip c-pc">Peças</span> Kit de embreagem</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section id="como-funciona">
+    <div class="container">
+      <div class="sobretitulo">Como funciona</div>
+      <h2 class="secao-titulo revelar">Do chamado à estrada<br><span class="laranja">sem surpresa</span></h2>
+      <p class="secao-sub revelar">Você acompanha cada etapa e só paga pelo que aprovou.</p>
+      <div class="etapas">
+        <div class="etapa revelar"><h3>Chamado</h3><p>Pelo WhatsApp, telefone ou direto na oficina. Socorro sai na hora.</p></div>
+        <div class="etapa revelar"><h3>Diagnóstico</h3><p>Avaliação técnica com scanner e fotos do problema.</p></div>
+        <div class="etapa revelar"><h3>Orçamento</h3><p>Valores detalhados enviados no WhatsApp para você aprovar.</p></div>
+        <div class="etapa revelar"><h3>Execução</h3><p>Serviço feito por especialistas, com registro de horas e fotos.</p></div>
+        <div class="etapa revelar"><h3>Entrega</h3><p>Teste de rodagem, assinatura digital e garantia por escrito.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCORRO -->
+  <section class="socorro" id="socorro">
+    <div class="container">
+      <div class="socorro-caixa revelar">
+        <div>
+          <h2>Quebrou na estrada?<br>A gente vai até você.</h2>
+          <p>Equipe móvel equipada para pane mecânica e elétrica na rodovia e no pátio da sua empresa. Atendimento 24 horas, inclusive fins de semana e feriados.</p>
+        </div>
+        <div class="socorro-acoes">
+          <div class="telefone-grande js-telefone">(11) 99999-0000</div>
+          <a class="btn btn-preto js-whats" data-msg="SOCORRO: meu caminhão quebrou na estrada. Minha localização é:" href="#"><svg><use href="#i-whats"/></svg> Chamar socorro agora</a>
+          <a class="btn btn-contorno js-ligar" style="color:#111;border-color:rgba(0,0,0,.35);background:rgba(255,255,255,.15)" href="#"><svg><use href="#i-fone"/></svg> Ligar agora</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIFERENCIAIS -->
+  <section>
+    <div class="container">
+      <div class="sobretitulo">Por que a Bruno</div>
+      <h2 class="secao-titulo revelar">Oficina séria,<br><span class="laranja">trabalho garantido</span></h2>
+      <div class="diferenciais-grid">
+        <div class="diferencial revelar"><div class="num">01</div><h3>Garantia por escrito</h3><p>90 dias de garantia nos serviços, registrada na OS e vinculada à placa do veículo.</p></div>
+        <div class="diferencial revelar"><div class="num">02</div><h3>Preço transparente</h3><p>Orçamento detalhado item por item: mão de obra, peças e deslocamento. Sem letra miúda.</p></div>
+        <div class="diferencial revelar"><div class="num">03</div><h3>Estrutura para pesados</h3><p>Galpão com valetas, elevadores para cavalo e carreta e pátio amplo para manobra.</p></div>
+        <div class="diferencial revelar"><div class="num">04</div><h3>Peças de procedência</h3><p>Fornecedores homologados, peças originais ou de primeira linha, com nota fiscal.</p></div>
+        <div class="diferencial revelar"><div class="num">05</div><h3>Tecnologia própria</h3><p>OS digital, fotos, assinatura e histórico por placa. Você recebe tudo no celular.</p></div>
+        <div class="diferencial revelar"><div class="num">06</div><h3>Agilidade</h3><p>Caminhão parado custa caro. Trabalhamos com prazo combinado e aviso a cada etapa.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEPOIMENTOS (exemplos para apresentação; trocar por depoimentos reais antes de publicar) -->
+  <section class="depoimentos">
+    <div class="container">
+      <div class="sobretitulo">Quem roda com a gente</div>
+      <h2 class="secao-titulo revelar">Transportador<br><span class="laranja">recomenda</span></h2>
+      <p style="margin:14px 0 0;color:#6b6b6b;font-size:13px">Depoimentos ilustrativos · versão de demonstração do site</p>
+      <div class="depo-grid">
+        <figure class="depo revelar" style="margin:0"><div class="estrelas">★★★★★</div><blockquote>Meu Scania parou na Fernão Dias de madrugada e em menos de duas horas a equipe estava lá. Resolveram na hora e eu segui viagem.</blockquote><figcaption class="autor"><div class="avatar">R</div><div><strong>Reginaldo M.</strong><span>Caminhoneiro autônomo</span></div></figcaption></figure>
+        <figure class="depo revelar" style="margin:0"><div class="estrelas">★★★★★</div><blockquote>Temos 30 caminhões no contrato. Recebo o histórico de cada placa e uma fatura só no fim do mês. Organização que a gente não tinha antes.</blockquote><figcaption class="autor"><div class="avatar">F</div><div><strong>Fernanda L.</strong><span>Gestora de frota · transportadora</span></div></figcaption></figure>
+        <figure class="depo revelar" style="margin:0"><div class="estrelas">★★★★★</div><blockquote>Orçamento chega no WhatsApp com foto de tudo. Sei exatamente o que estou pagando. Oficina de confiança.</blockquote><figcaption class="autor"><div class="avatar">M</div><div><strong>Marcos A.</strong><span>Responsável de frota · logística</span></div></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <div class="container faq-grid">
+      <div>
+        <div class="sobretitulo">Dúvidas</div>
+        <h2 class="secao-titulo revelar">Perguntas<br><span class="laranja">frequentes</span></h2>
+        <p class="secao-sub revelar">Não achou sua resposta? Chama a gente no WhatsApp que respondemos rapidinho.</p>
+      </div>
+      <div class="revelar">
+        <details open><summary>Vocês atendem na estrada? <span class="mais">+</span></summary><p>Sim. Temos equipe móvel para socorro mecânico e elétrico na rodovia e no pátio da sua transportadora, 24 horas por dia, inclusive fins de semana.</p></details>
+        <details><summary>Quais marcas vocês atendem? <span class="mais">+</span></summary><p>Todas as principais marcas de caminhões pesados e semipesados (Volvo, Scania, Mercedes-Benz, DAF, Volkswagen, Iveco, Ford) e implementos como Randon, Librelato e Facchini.</p></details>
+        <details><summary>Como funciona o contrato para frotas? <span class="mais">+</span></summary><p>Montamos um plano preventivo para cada placa, com tabela de preços própria, prioridade no atendimento e faturamento mensal com todas as OS do período.</p></details>
+        <details><summary>O serviço tem garantia? <span class="mais">+</span></summary><p>Sim. Os serviços têm 90 dias de garantia, registrada na ordem de serviço e vinculada à placa do veículo.</p></details>
+        <details><summary>Quais formas de pagamento? <span class="mais">+</span></summary><p>Pix, cartão, boleto e faturamento para empresas (15, 30 ou 45 dias, ou fechamento mensal), conforme cadastro.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTATO -->
+  <section class="contato" id="contato">
+    <div class="container contato-grid">
+      <div>
+        <div class="sobretitulo">Fale com a gente</div>
+        <h2 class="secao-titulo revelar">Peça seu<br><span class="laranja">orçamento</span></h2>
+        <p class="secao-sub revelar">Responda em 1 minuto e receba o retorno da nossa equipe pelo WhatsApp.</p>
+        <div class="info-contato">
+          <div class="info revelar"><div class="icone"><svg><use href="#i-pin"/></svg></div><div><strong>Endereço</strong><span>Rod. Fernão Dias, km 52 — Bragança Paulista/SP<br>Fácil acesso para carretas e bitrens</span></div></div>
+          <div class="info revelar"><div class="icone"><svg><use href="#i-relogio"/></svg></div><div><strong>Horário</strong><span>Oficina: segunda a sexta, 7h às 18h · sábado, 7h às 12h<br>Socorro na estrada: 24 horas</span></div></div>
+          <div class="info revelar"><div class="icone"><svg><use href="#i-fone"/></svg></div><div><strong>Telefone e WhatsApp</strong><span class="js-telefone">(11) 99999-0000</span></div></div>
+          <div class="info revelar"><div class="icone"><svg><use href="#i-email"/></svg></div><div><strong>E-mail</strong><span>contato@brunomecanicadiesel.com.br</span></div></div>
+        </div>
+      </div>
+      <form class="orcamento revelar" id="formOrcamento" novalidate>
+        <h3>Orçamento rápido</h3>
+        <p>Sem compromisso. Responderemos pelo WhatsApp.</p>
+        <div class="campos">
+          <div class="campo"><label for="f-nome">Seu nome</label><input id="f-nome" name="nome" required autocomplete="name" placeholder="Nome completo"></div>
+          <div class="campo"><label for="f-empresa">Empresa</label><input id="f-empresa" name="empresa" autocomplete="organization" placeholder="Opcional"></div>
+          <div class="campo"><label for="f-placa">Placa</label><input id="f-placa" name="placa" placeholder="ABC-1D23" style="text-transform:uppercase"></div>
+          <div class="campo"><label for="f-tipo">Tipo de atendimento</label>
+            <select id="f-tipo" name="tipo">
+              <option>Manutenção na oficina</option>
+              <option>Socorro na estrada</option>
+              <option>Revisão preventiva</option>
+              <option>Contrato para frota</option>
+              <option>Rastreador / telemetria</option>
+            </select>
+          </div>
+          <div class="campo inteiro"><label for="f-relato">O que está acontecendo?</label><textarea id="f-relato" name="relato" placeholder="Ex.: Volvo FH 540 perdendo força em subida, luz de injeção acesa…"></textarea></div>
+        </div>
+        <button class="btn btn-whats" type="submit"><svg><use href="#i-whats"/></svg> Enviar pelo WhatsApp</button>
+        <p class="nota">Seus dados são usados só para responder ao seu pedido.</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<div class="listras" aria-hidden="true"></div>
+<footer>
+  <div class="container">
+    <div class="rodape-grid">
+      <div>
+        <img class="rodape-logo" src="../logo.png" alt="Bruno Mecânica Diesel" loading="lazy">
+        <p style="color:var(--cinza);margin:0;max-width:320px;font-size:15px">Manutenção pesada de caminhões, carretas e frotas. Seriedade, garantia e tecnologia para manter sua operação rodando.</p>
+      </div>
+      <div><h4>Serviços</h4><ul><li><a href="#servicos">Motor e retífica</a></li><li><a href="#servicos">Injeção eletrônica</a></li><li><a href="#servicos">Câmbio e embreagem</a></li><li><a href="#servicos">Freios a ar e ABS</a></li><li><a href="#servicos">Rastreadores</a></li></ul></div>
+      <div><h4>Empresa</h4><ul><li><a href="#frotas">Para transportadoras</a></li><li><a href="#como-funciona">Como funciona</a></li><li><a href="#socorro">Socorro 24h</a></li><li><a href="../" title="Acesso da equipe">Área da equipe</a></li></ul></div>
+      <div><h4>Contato</h4><ul><li class="js-telefone">(11) 99999-0000</li><li>contato@brunomecanicadiesel.com.br</li><li>Rod. Fernão Dias, km 52<br>Bragança Paulista/SP</li></ul></div>
+    </div>
+    <div class="rodape-fim">
+      <span>© <span id="ano">2026</span> Bruno Mecânica Diesel · CNPJ 00.000.000/0001-00</span>
+      <span>Feito com sistema próprio de gestão · <a href="../">Área da equipe</a></span>
+    </div>
+  </div>
+</footer>
+
+<a class="whats-flutuante js-whats" data-msg="Olá! Vim pelo site da Bruno Mecânica Diesel." href="#" aria-label="Falar no WhatsApp"><svg><use href="#i-whats"/></svg></a>
+
+<script>
+  // Dados de contato: troque aqui e todo o site se atualiza.
+  const CONTATO = { telefone: '(11) 99999-0000', whatsapp: '5511999990000' };
+
+  const linkWhats = (msg) => 'https://wa.me/' + CONTATO.whatsapp + '?text=' + encodeURIComponent(msg);
+  document.querySelectorAll('.js-whats').forEach((a) => {
+    a.href = linkWhats(a.dataset.msg || 'Olá!');
+    a.target = '_blank';
+    a.rel = 'noopener';
+  });
+  document.querySelectorAll('.js-ligar').forEach((a) => { a.href = 'tel:+' + CONTATO.whatsapp; });
+  document.querySelectorAll('.js-telefone').forEach((el) => { el.textContent = CONTATO.telefone; });
+  document.getElementById('ano').textContent = new Date().getFullYear();
+
+  // Menu do celular
+  const botao = document.getElementById('botaoMenu');
+  const menu = document.getElementById('menuMovel');
+  botao.addEventListener('click', () => {
+    const aberto = menu.classList.toggle('aberto');
+    botao.setAttribute('aria-expanded', String(aberto));
+  });
+  menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => { menu.classList.remove('aberto'); botao.setAttribute('aria-expanded', 'false'); }));
+
+  // Formulário → mensagem pronta no WhatsApp
+  document.getElementById('formOrcamento').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const nome = (f.get('nome') || '').toString().trim();
+    if (!nome) { document.getElementById('f-nome').focus(); return; }
+    const linhas = [
+      'Olá! Quero um orçamento pela Bruno Mecânica Diesel.',
+      '',
+      '*Nome:* ' + nome,
+      f.get('empresa') ? '*Empresa:* ' + f.get('empresa') : '',
+      f.get('placa') ? '*Placa:* ' + f.get('placa').toString().toUpperCase() : '',
+      '*Atendimento:* ' + f.get('tipo'),
+      f.get('relato') ? '*Relato:* ' + f.get('relato') : '',
+    ].filter((l) => l !== null && l !== undefined && (l === '' || l));
+    window.open(linkWhats(linhas.join('\n')), '_blank', 'noopener');
+  });
+
+  // Animação de entrada e contadores
+  const reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const contar = (el) => {
+    const alvo = Number(el.dataset.contar);
+    const fim = (n) => (el.dataset.mais !== undefined ? '+' : '') + n.toLocaleString('pt-BR') + (el.dataset.sufixo || '');
+    if (reduzir) { el.textContent = fim(alvo); return; }
+    const inicio = performance.now();
+    const passo = (t) => {
+      const p = Math.min(1, (t - inicio) / 1600);
+      el.textContent = fim(Math.round(alvo * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) requestAnimationFrame(passo);
+    };
+    requestAnimationFrame(passo);
+  };
+  if ('IntersectionObserver' in window) {
+    const obs = new IntersectionObserver((entradas) => {
+      entradas.forEach((en) => {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('visivel');
+        en.target.querySelectorAll('[data-contar]').forEach(contar);
+        obs.unobserve(en.target);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.revelar').forEach((el, i) => {
+      el.style.transitionDelay = (i % 4) * 70 + 'ms';
+      obs.observe(el);
+    });
+  } else {
+    document.querySelectorAll('.revelar').forEach((el) => el.classList.add('visivel'));
+    document.querySelectorAll('[data-contar]').forEach(contar);
+  }
+</script>
+</body>
+</html>
